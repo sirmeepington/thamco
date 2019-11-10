@@ -18,7 +18,7 @@ namespace ThAmCo.Events.Controllers
             _context = context;
         }
 
-        // GET: GuestBookings
+        // GET: GuestBookings/Index/EVENTID
         public async Task<IActionResult> Index(int? id)
         {
             var eventsDbContext = _context.Guests.Include(g => g.Customer).Include(g => g.Event);
@@ -62,7 +62,7 @@ namespace ThAmCo.Events.Controllers
             return View(guestBooking);
         }
 
-        // GET: GuestBookings/Edit/5
+        // GET: GuestBookings/Attend/5
         public async Task<IActionResult> Attend(int? id, int? customerId)
         {
             if (id == null || customerId == null) 
@@ -70,7 +70,7 @@ namespace ThAmCo.Events.Controllers
                 return NotFound();
             }
 
-            GuestBooking booking = await _context.Guests.FindAsync(id, customerId);
+            GuestBooking booking = await _context.Guests.FindAsync(customerId, id);
             if (booking == null)
                 return NotFound();
 
@@ -78,7 +78,7 @@ namespace ThAmCo.Events.Controllers
                 return RedirectToAction(nameof(Index), new { id });
 
             booking.Attended = true; // Attend 
-            _context.Update(booking);
+            _context.Entry(booking).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index), new { id });
@@ -96,7 +96,7 @@ namespace ThAmCo.Events.Controllers
             var guestBooking = await _context.Guests
                 .Include(g => g.Customer)
                 .Include(g => g.Event)
-                .FirstOrDefaultAsync(m => m.CustomerId == id && m.EventId == customerId);
+                .FirstOrDefaultAsync(m => m.CustomerId == customerId && m.EventId == id);
             if (guestBooking == null)
             {
                 return NotFound();
