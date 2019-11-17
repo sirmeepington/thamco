@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ThAmCo.Events.Data;
+using ThAmCo.Events.Models;
 
 namespace ThAmCo.Events.Controllers
 {
@@ -27,19 +28,28 @@ namespace ThAmCo.Events.Controllers
         // GET: Events/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
+            if (!id.HasValue)
             {
                 return NotFound();
             }
 
-            var @event = await _context.Events
+            Event @event = await _context.Events
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (@event == null)
             {
                 return NotFound();
             }
 
-            return View(@event);
+            EventDetailsViewModel viewModel = new EventDetailsViewModel()
+            {
+                Id = @event.Id,
+                Title = @event.Title,
+                Date = @event.Date,
+                Duration = @event.Duration,
+                TypeId = @event.TypeId
+            };
+
+            return View(viewModel);
         }
 
         // GET: Events/Create
@@ -53,11 +63,19 @@ namespace ThAmCo.Events.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Date,Duration,TypeId")] Event @event)
+        public async Task<IActionResult> Create([Bind("Id,Title,Date,Duration,TypeId")] EventCreateViewModel @event)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(@event);
+                Event e = new Event()
+                {
+                    Id = @event.Id,
+                    Date = @event.Date,
+                    Duration = @event.Duration,
+                    Title = @event.Title,
+                    TypeId = @event.TypeId
+                };
+                _context.Add(e);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -72,12 +90,18 @@ namespace ThAmCo.Events.Controllers
                 return NotFound();
             }
 
-            var @event = await _context.Events.FindAsync(id);
+            Event @event = await _context.Events.FindAsync(id);
             if (@event == null)
             {
                 return NotFound();
             }
-            return View(@event);
+            EventEditViewModel eventEditViewModel = new EventEditViewModel()
+            {
+                Duration = @event.Duration,
+                Id = @event.Id,
+                Title = @event.Title
+            };
+            return View(eventEditViewModel);
         }
 
         // POST: Events/Edit/5
@@ -85,7 +109,7 @@ namespace ThAmCo.Events.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Date,Duration,TypeId")] Event @event)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Duration")] EventEditViewModel @event)
         {
             if (id != @event.Id)
             {
@@ -96,7 +120,13 @@ namespace ThAmCo.Events.Controllers
             {
                 try
                 {
-                    _context.Update(@event);
+                    Event e = await _context.Events.FirstOrDefaultAsync(dbEvent => dbEvent.Id == @event.Id);
+                    if (e == null)
+                        return BadRequest();
+
+                    e.Duration = @event.Duration;
+                    e.Title = @event.Title;
+                    _context.Update(e);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -123,7 +153,7 @@ namespace ThAmCo.Events.Controllers
                 return NotFound();
             }
 
-            var @event = await _context.Events
+            Event @event = await _context.Events
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (@event == null)
             {
@@ -138,7 +168,7 @@ namespace ThAmCo.Events.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var @event = await _context.Events.FindAsync(id);
+            Event @event = await _context.Events.FindAsync(id);
             _context.Events.Remove(@event);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
 
 namespace ThAmCo.Events.Data
 {
@@ -8,14 +6,10 @@ namespace ThAmCo.Events.Data
     {
         public int Id { get; set; }
 
-        [Required]
         public string Surname { get; set; }
 
-        [Required]
         public string FirstName { get; set; }
 
-        [Required]
-        [DataType(DataType.EmailAddress)]
         public string Email { get; set; }
 
         public List<GuestBooking> Bookings { get; set; }
