@@ -14,31 +14,21 @@ namespace ThAmCo.Events.Controllers
     {
         private readonly EventsDbContext _context;
 
-        public EventsController(EventsDbContext context)
-        {
-            _context = context;
-        }
+        public EventsController(EventsDbContext context) => _context = context;
 
         // GET: Events
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.Events.ToListAsync());
-        }
+        public async Task<IActionResult> Index() => View(await _context.Events.ToListAsync());
 
         // GET: Events/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (!id.HasValue)
-            {
                 return NotFound();
-            }
 
             Event @event = await _context.Events
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (@event == null)
-            {
                 return NotFound();
-            }
 
             EventDetailsViewModel viewModel = new EventDetailsViewModel()
             {
@@ -53,10 +43,7 @@ namespace ThAmCo.Events.Controllers
         }
 
         // GET: Events/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
+        public IActionResult Create() => View();
 
         // POST: Events/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
@@ -86,15 +73,12 @@ namespace ThAmCo.Events.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             Event @event = await _context.Events.FindAsync(id);
             if (@event == null)
-            {
                 return NotFound();
-            }
+
             EventEditViewModel eventEditViewModel = new EventEditViewModel()
             {
                 Duration = @event.Duration,
@@ -112,9 +96,7 @@ namespace ThAmCo.Events.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Duration")] EventEditViewModel @event)
         {
             if (id != @event.Id)
-            {
                 return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
@@ -132,13 +114,9 @@ namespace ThAmCo.Events.Controllers
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!EventExists(@event.Id))
-                    {
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -149,16 +127,12 @@ namespace ThAmCo.Events.Controllers
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             Event @event = await _context.Events
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (@event == null)
-            {
                 return NotFound();
-            }
 
             return View(@event);
         }
@@ -174,9 +148,6 @@ namespace ThAmCo.Events.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool EventExists(int id)
-        {
-            return _context.Events.Any(e => e.Id == id);
-        }
+        private bool EventExists(int id) => _context.Events.Any(e => e.Id == id);
     }
 }

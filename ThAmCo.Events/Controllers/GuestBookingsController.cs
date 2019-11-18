@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -57,6 +55,7 @@ namespace ThAmCo.Events.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "Email", guestBooking.CustomerId);
             ViewData["EventId"] = new SelectList(_context.Events, "Id", "Title", guestBooking.EventId);
             return View(guestBooking);
@@ -66,9 +65,7 @@ namespace ThAmCo.Events.Controllers
         public async Task<IActionResult> Attend(int? id, int? customerId)
         {
             if (id == null || customerId == null) 
-            {
                 return NotFound();
-            }
 
             GuestBooking booking = await _context.Guests.FindAsync(customerId, id);
             if (booking == null)
@@ -89,18 +86,15 @@ namespace ThAmCo.Events.Controllers
         public async Task<IActionResult> Remove(int? id, int? customerId)
         {
             if (id == null || customerId == null)
-            {
                 return NotFound();
-            }
 
             var guestBooking = await _context.Guests
                 .Include(g => g.Customer)
                 .Include(g => g.Event)
                 .FirstOrDefaultAsync(m => m.CustomerId == customerId && m.EventId == id);
+
             if (guestBooking == null)
-            {
                 return NotFound();
-            }
 
             return View(guestBooking);
         }
@@ -110,9 +104,13 @@ namespace ThAmCo.Events.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveConfirmed(int id, int customerId)
         {
-            var guestBooking = await _context.Guests.FindAsync(id, customerId);
+            var guestBooking = await _context.Guests.FirstOrDefaultAsync(x => x.CustomerId == customerId && x.EventId == id);
+            if (guestBooking == null)
+                return BadRequest();
+
             _context.Guests.Remove(guestBooking);
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
     }

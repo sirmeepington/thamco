@@ -11,31 +11,21 @@ namespace ThAmCo.Events.Controllers
     {
         private readonly EventsDbContext _context;
 
-        public CustomersController(EventsDbContext context)
-        {
-            _context = context;
-        }
+        public CustomersController(EventsDbContext context) => _context = context;
 
         // GET: Customers
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.Customers.ToListAsync());
-        }
+        public async Task<IActionResult> Index() => View(await _context.Customers.ToListAsync());
 
         // GET: Customers/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             Customer customer = await _context.Customers
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (customer == null)
-            {
                 return NotFound();
-            }
 
             CustomerDetailsViewModel model = new CustomerDetailsViewModel()
             {
@@ -54,10 +44,7 @@ namespace ThAmCo.Events.Controllers
         }
 
         // GET: Customers/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
+        public IActionResult Create() => View();
 
         // POST: Customers/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
@@ -86,15 +73,11 @@ namespace ThAmCo.Events.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             Customer customer = await _context.Customers.FindAsync(id);
             if (customer == null)
-            {
                 return NotFound();
-            }
 
             CustomerEditViewModel model = new CustomerEditViewModel()
             {
@@ -115,9 +98,7 @@ namespace ThAmCo.Events.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("Id,Surname,FirstName,Email")] CustomerEditViewModel customer)
         {
             if (id != customer.Id)
-            {
                 return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
@@ -137,13 +118,9 @@ namespace ThAmCo.Events.Controllers
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!CustomerExists(customer.Id))
-                    {
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -154,16 +131,13 @@ namespace ThAmCo.Events.Controllers
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             Customer customer = await _context.Customers
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (customer == null)
-            {
                 return NotFound();
-            }
 
             return View(customer);
         }
@@ -179,9 +153,6 @@ namespace ThAmCo.Events.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CustomerExists(int id)
-        {
-            return _context.Customers.Any(e => e.Id == id);
-        }
+        private bool CustomerExists(int id) => _context.Customers.Any(e => e.Id == id);
     }
 }

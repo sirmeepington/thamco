@@ -36,8 +36,18 @@
                 @Html.DisplayFor(modelItem => item.Attended)
             </td>
             <td>
-                @Html.ActionLink("Attend", "Attend", new { id=item.EventId, customerId = item.CustomerId }) |
-                @Html.ActionLink("Remove", "Remove", new { id=item.EventId, customerId = item.CustomerId })
+                @{
+                    if (!item.Attended)
+                    {
+                        Html.ActionLink("Attend", "Attend", new
+                        {
+                            id = item.EventId,
+                            customerId = item.CustomerId
+                        });
+                        @:|
+                    }
+                    @Html.ActionLink("Remove", "Remove", new { id = item.EventId, customerId = item.CustomerId })
+                }
             </td>
         </tr>
 }
