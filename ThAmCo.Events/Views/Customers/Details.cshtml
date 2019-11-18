@@ -69,7 +69,7 @@
             </dt>
             <dd>
                 @{ 
-                    if (entry.Event.Date < DateTime.UtcNow || !entry.Attended) 
+                    if (entry.Event.Date < DateTime.UtcNow && !entry.Attended) 
                     {
                         <button type="button" class="btn btn-danger" onclick="location.href='@Url.Action("Remove","GuestBookings",new { id = entry.EventId, customerId = entry.CustomerId})'">Cancel Booking</button>
                     } else
