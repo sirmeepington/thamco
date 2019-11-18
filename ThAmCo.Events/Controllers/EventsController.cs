@@ -17,7 +17,26 @@ namespace ThAmCo.Events.Controllers
         public EventsController(EventsDbContext context) => _context = context;
 
         // GET: Events
-        public async Task<IActionResult> Index() => View(await _context.Events.ToListAsync());
+        public async Task<IActionResult> Index()
+        {
+            IEnumerable <Event> e = await _context.Events.ToListAsync();
+            List<EventDetailsViewModel> model = new List<EventDetailsViewModel>();
+            foreach (Event ev in e)
+            {
+                EventDetailsViewModel temp = new EventDetailsViewModel()
+                {
+                    Date = ev.Date,
+                    Duration = ev.Duration,
+                    Id = ev.Id,
+                    Title = ev.Title,
+                    Bookings = ev.Bookings,
+                    TypeId = ev.TypeId
+                };
+                model.Add(temp);
+            }
+
+            return View(model);
+        }
 
         // GET: Events/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -36,7 +55,8 @@ namespace ThAmCo.Events.Controllers
                 Title = @event.Title,
                 Date = @event.Date,
                 Duration = @event.Duration,
-                TypeId = @event.TypeId
+                TypeId = @event.TypeId,
+                Bookings = await _context.Guests.Include(e => e.Customer).Include(e => e.Event).Where(e => e.EventId == id).ToListAsync()
             };
 
             return View(viewModel);

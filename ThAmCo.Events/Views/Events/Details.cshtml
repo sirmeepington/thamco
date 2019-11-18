@@ -4,10 +4,11 @@
     ViewData["Title"] = "Details";
 }
 
-<h2>Event Details</h2>
+<h2>Event: @Model.Title</h2>
 
 <div>
     <hr />
+    <h4>Event Details</h4>
     <dl class="dl-horizontal">
         <dt>
             @Html.DisplayNameFor(model => model.Title)
@@ -33,6 +34,53 @@
         <dd>
             @Html.DisplayFor(model => model.TypeId)
         </dd>
+    </dl>
+    <hr />
+    <h4>Booking Details</h4>
+    <h5>There are currently <b>@Model.Bookings.Count</b> booking(s) for this event.</h5>
+    <dl class="dl-horizontal">
+        @foreach (ThAmCo.Events.Data.GuestBooking entry in Model.Bookings)
+        {
+            CustomerDetailsViewModel detailView = new CustomerDetailsViewModel()
+            {
+                FirstName = entry.Customer.FirstName,
+                Bookings = entry.Customer.Bookings,
+                Email = entry.Customer.Email,
+                Id = entry.Customer.Id,
+                Surname = entry.Customer.Surname,
+                FullName = entry.Customer.FullName
+            };
+
+            <hr />
+            <dt>
+                @Html.DisplayNameFor(e => detailView.FullName)
+            </dt>
+            <dd>
+                @Html.DisplayFor(e => detailView.FullName)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(e => detailView.Email)
+            </dt>
+            <dd>
+                @Html.DisplayFor(e => detailView.Email)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(e => entry.Attended)
+            </dt>
+            <dd>
+                @{
+                    if (entry.Attended)
+                    {
+                        <span class="glyphicon glyphicon-ok"></span>
+                    }
+                    else
+                    {
+                        <span class="glyphicon glyphicon-remove"></span>
+                    }
+                }
+            </dd>
+        }
+
     </dl>
 </div>
 <div>
