@@ -1,13 +1,13 @@
-﻿@model ThAmCo.Events.Data.Customer
+﻿@model ThAmCo.Events.Models.CustomerDetailsViewModel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Customer Details";
 }
 
-<h2>Details</h2>
+<h2>Inspecting entry for @Html.DisplayFor(model => model.FirstName) @Html.DisplayFor(model => model.Surname)</h2>
 
 <div>
-    <h4>Customer</h4>
+    <h4>Customer Details</h4>
     <hr />
     <dl class="dl-horizontal">
         <dt>
@@ -29,8 +29,59 @@
             @Html.DisplayFor(model => model.Email)
         </dd>
     </dl>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit Customer Details</a>
+    <hr />
+    <h4>Event Details</h4>
+    <h5>Customer is registered for <b>@Model.Bookings.Count()</b> booking(s).</h5>
+    <hr />
+    <dl class="dl-horizontal">
+        @foreach (ThAmCo.Events.Data.GuestBooking entry in Model.Bookings)
+        {
+            <dt>
+                @Html.DisplayNameFor(e => entry.Event.Title)
+            </dt>
+            <dd>
+                @Html.DisplayFor(e => entry.Event.Title)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(e => entry.Event.Date)
+            </dt>
+            <dd>
+                @Html.DisplayFor(e => entry.Event.Date)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(e => entry.Attended)
+            </dt>
+            <dd>
+                @{
+                    if (entry.Attended)
+                    {
+                        <span class="glyphicon glyphicon-ok"></span>
+                    }
+                    else
+                    {
+                        <span class="glyphicon glyphicon-remove"></span>
+                    }
+                }
+            </dd>
+            <dt>
+                Cancel
+            </dt>
+            <dd>
+                @{ 
+                    if (entry.Event.Date < DateTime.UtcNow || !entry.Attended) 
+                    {
+                        <button type="button" class="btn btn-danger" onclick="location.href='@Url.Action("Remove","GuestBookings",new { id = entry.EventId, customerId = entry.CustomerId})'">Cancel Booking</button>
+                    } else
+                    {
+                        <p>Unable to cancel: Customer has attended or event has occured.</p>
+                    }
+                }
+            </dd>
+            <br />
+        }
+    </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
