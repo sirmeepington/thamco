@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ThAmCo.Events.Data;
+using ThAmCo.Events.Models;
 
 namespace ThAmCo.Events.Controllers
 {
@@ -96,7 +97,16 @@ namespace ThAmCo.Events.Controllers
             if (guestBooking == null)
                 return NotFound();
 
-            return View(guestBooking);
+            GuestBookingRemoveViewModel viewModel = new GuestBookingRemoveViewModel()
+            {
+                Attended = guestBooking.Attended,
+                Customer = guestBooking.Customer,
+                CustomerId = guestBooking.CustomerId,
+                Event = guestBooking.Event,
+                EventId = guestBooking.EventId
+            };
+
+            return View(viewModel);
         }
 
         // POST: GuestBookings/Delete/5

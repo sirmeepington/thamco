@@ -10,6 +10,8 @@ namespace ThAmCo.Events.Data
 
         public string FirstName { get; set; }
 
+        public string FullName => FirstName + " " + Surname;
+
         public string Email { get; set; }
 
         public List<GuestBooking> Bookings { get; set; }

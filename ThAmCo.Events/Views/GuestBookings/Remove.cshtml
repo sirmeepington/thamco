@@ -1,4 +1,4 @@
-﻿@model ThAmCo.Events.Data.GuestBooking
+﻿@model ThAmCo.Events.Models.GuestBookingRemoveViewModel
 
 @{
     ViewData["Title"] = "Remove booking";
@@ -14,7 +14,7 @@
             @Html.DisplayNameFor(model => model.Customer)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.Customer.Email)
+            @Html.DisplayFor(model => model.Customer.FullName) <i>(@Html.DisplayFor(model => model.Customer.Email))</i>
         </dd>
         <dt>
             @Html.DisplayNameFor(model => model.Event)
