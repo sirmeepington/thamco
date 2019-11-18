@@ -20,14 +20,19 @@ namespace ThAmCo.Events.Controllers
         // GET: GuestBookings/Index/EVENTID
         public async Task<IActionResult> Index(int? id)
         {
-            var eventsDbContext = _context.Guests.Include(g => g.Customer).Include(g => g.Event);
+            var eventsDbContext = _context.Guests
+                                    .Include(g => g.Customer)
+                                    .Include(g => g.Event);
             if (id.HasValue)
             {
-                Event ev = await _context.Events.FirstOrDefaultAsync(e => e.Id == id);
+                Event ev = await _context.Events
+                                .FirstOrDefaultAsync(e => e.Id == id);
                 if (ev != null)
                 {
                     ViewData["Title"] = "Guest Bookings for "+ev.Title;
-                    var outList = await eventsDbContext.Where(g => g.EventId == ev.Id).ToListAsync();
+                    var outList = await eventsDbContext
+                                    .Where(g => g.EventId == ev.Id)
+                                    .ToListAsync();
                     return View(outList);
                 }
             }
@@ -38,7 +43,7 @@ namespace ThAmCo.Events.Controllers
         // GET: GuestBookings/Create
         public IActionResult Create()
         {
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "Email");
+            ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "FullName");
             ViewData["EventId"] = new SelectList(_context.Events, "Id", "Title");
             return View();
         }
@@ -48,16 +53,22 @@ namespace ThAmCo.Events.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CustomerId,EventId,Attended")] GuestBooking guestBooking)
+        public async Task<IActionResult> Create([Bind("CustomerId,EventId,Attended")] GuestBookingCreateViewModel guestBooking)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(guestBooking);
+                GuestBooking booking = new GuestBooking()
+                {
+                    CustomerId = guestBooking.CustomerId,
+                    EventId = guestBooking.EventId,
+                    Attended = guestBooking.Attended
+                };
+                _context.Add(booking);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "Email", guestBooking.CustomerId);
+            ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "FullName", guestBooking.CustomerId);
             ViewData["EventId"] = new SelectList(_context.Events, "Id", "Title", guestBooking.EventId);
             return View(guestBooking);
         }
