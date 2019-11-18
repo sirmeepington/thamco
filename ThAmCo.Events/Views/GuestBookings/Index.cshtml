@@ -33,13 +33,22 @@
                 @Html.DisplayFor(modelItem => item.Event.Title)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Attended)
+            @{  
+                if (item.Attended)
+                {
+                    @:<span class="glyphicon glyphicon-ok"></span>
+                }
+                else
+                {
+                    @:<span class="glyphicon glyphicon-remove"></span>
+                }
+            }
             </td>
             <td>
                 @{
                     if (!item.Attended)
                     {
-                        Html.ActionLink("Attend", "Attend", new
+                        @Html.ActionLink("Attend", "Attend", new
                         {
                             id = item.EventId,
                             customerId = item.CustomerId
