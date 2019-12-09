@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ThAmCo.Events.Data;
+using ThAmCo.VenuesFacade;
 
 namespace ThAmCo.Events
 {
@@ -36,7 +37,9 @@ namespace ThAmCo.Events
             {
                 var cs = Configuration.GetConnectionString("EventsSqlConnection");
                 options.UseSqlServer(cs);
-            });                
+            });
+            services.AddScoped<IAvailabilities, Availabilities>();
+            services.AddScoped<IReservation, Reservation>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

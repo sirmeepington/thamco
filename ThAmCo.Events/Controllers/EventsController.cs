@@ -7,14 +7,21 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ThAmCo.Events.Data;
 using ThAmCo.Events.Models;
+using ThAmCo.Venues.Data;
+using ThAmCo.VenuesFacade;
 
 namespace ThAmCo.Events.Controllers
 {
     public class EventsController : Controller
     {
         private readonly EventsDbContext _context;
+        private readonly IAvailabilities _availabilities;
 
-        public EventsController(EventsDbContext context) => _context = context;
+        public EventsController(EventsDbContext context, IAvailabilities availabilities)
+        {
+            _context = context;
+            _availabilities = availabilities;
+        }
 
         // GET: Events
         public async Task<IActionResult> Index()
@@ -49,6 +56,19 @@ namespace ThAmCo.Events.Controllers
             if (@event == null)
                 return NotFound();
 
+            AvailabilityDto eventAvailability = await _availabilities.GetAvailability(
+                                                @event.TypeId,
+                                                @event.Date,
+                                                @event.Date.Add(@event.Duration.Value));
+            Availability availability = new Availability()
+            {
+                Date = eventAvailability.Date,
+                CostPerHour = eventAvailability.CostPerHour,
+                Reservation = eventAvailability.Reservation,
+                Venue = eventAvailability.Venue,
+                VenueCode = eventAvailability.VenueCode
+            };
+
             EventDetailsViewModel viewModel = new EventDetailsViewModel()
             {
                 Id = @event.Id,
@@ -56,9 +76,10 @@ namespace ThAmCo.Events.Controllers
                 Date = @event.Date,
                 Duration = @event.Duration,
                 TypeId = @event.TypeId,
-                Bookings = await _context.Guests.Include(e => e.Customer).Include(e => e.Event).Where(e => e.EventId == id).ToListAsync()
+                Bookings = await _context.Guests.Include(e => e.Customer).Include(e => e.Event).Where(e => e.EventId == id).ToListAsync(),
+                BookingInfo = availability
             };
-
+            
             return View(viewModel);
         }
 

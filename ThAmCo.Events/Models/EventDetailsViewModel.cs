@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using ThAmCo.Events.Data;
+using ThAmCo.Venues.Data;
 
 namespace ThAmCo.Events.Models
 {
@@ -21,5 +22,7 @@ namespace ThAmCo.Events.Models
         public string TypeId { get; set; }
 
         public List<GuestBooking> Bookings { get; set; }
+
+        public Availability BookingInfo { get; set; }
     }
 }
