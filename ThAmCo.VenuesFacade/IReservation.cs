@@ -10,6 +10,10 @@ namespace ThAmCo.VenuesFacade
     {
 
         Task<ReservationGetDto> GetReservation(string venueCode, DateTime startDate);
+
+        Task<bool> CancelReservation(string reference);
+
+        Task<ReservationGetDto> CreateReservation(string reference, DateTime date, string venue);
         
     }
 }

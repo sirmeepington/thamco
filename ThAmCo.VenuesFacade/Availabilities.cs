@@ -37,31 +37,28 @@ namespace ThAmCo.VenuesFacade
             return true;
         }
 
-        public async Task<AvailabilityDto> GetAvailability(string eventType, DateTime from, DateTime to)
+        public async Task<List<AvailabilityDto>> GetAvailabilities(string eventType, DateTime from, DateTime to)
         {
             if (!EnsureClient()) {
-                return new AvailabilityDto();
+                return new List<AvailabilityDto>();
             }
-            AvailabilityDto venue;
+            List<AvailabilityDto> venue;
             try
             {
                 var query = HttpUtility.ParseQueryString(string.Empty);
                 query["eventType"] = eventType;
-                query["beginDate"] = from.ToString();
-                query["endDate"] = to.ToString();
+                query["beginDate"] = from.ToString("d");
+                query["endDate"] = to.ToString("d");
                 var response = await client.GetAsync("api/availability?"+query.ToString());
                 response.EnsureSuccessStatusCode();
                 string responseStr = await response.Content.ReadAsStringAsync();
                 List<AvailabilityDto> venues = await response.Content.ReadAsAsync<List<AvailabilityDto>>();
-                if (venues.Count > 0)
-                    venue = venues[0];
-                else
-                    venue = new AvailabilityDto();
+                return venues;
             } catch (HttpRequestException ex)
             {
                 _logger.LogError(
                     "Failed to receive venue from Venues server. Exception: " + ex.ToString());
-                venue = new AvailabilityDto();
+                venue = new List<AvailabilityDto>();
             }
             return venue;
         }

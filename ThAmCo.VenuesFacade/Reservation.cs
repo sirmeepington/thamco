@@ -64,5 +64,35 @@ namespace ThAmCo.VenuesFacade
 
             return reservation;
         }
+
+        public async Task<ReservationGetDto> CreateReservation(string reference, DateTime date, string venue)
+        {
+
+            if (!EnsureClient())
+                return null;
+
+            ReservationGetDto reservation;
+            try
+            {
+                ReservationPostDto reservationPostDto = new ReservationPostDto()
+                {
+                    EventDate = date,
+                    VenueCode = venue
+                };
+                var response = await client.PostAsJsonAsync("api/reservation",reservationPostDto);
+                response.EnsureSuccessStatusCode();
+                reservation = await response.Content.ReadAsAsync<ReservationGetDto>();
+            } catch (HttpRequestException ex)
+            {
+                _logger.LogError("Caught an error when creating a reservation at reference " + reference + ". Exception: " + ex);
+                reservation = new ReservationGetDto();
+            }
+            return reservation;
+        }
+
+        public Task<bool> CancelReservation(string reference)
+        {
+            return Task.FromResult(true);
+        }
     }
 }

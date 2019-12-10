@@ -5,14 +5,16 @@ namespace ThAmCo.VenuesFacade
 {
     public class AvailabilityDto
     {
+
+        public string Code { get; set; }
+
+        public string Name { get; set; }
+
+        public int Capacity { get; set; }
+
         public DateTime Date { get; set; }
-
-        public string VenueCode { get; set; }
-
-        public Venue Venue { get; set; }
 
         public double CostPerHour { get; set; }
 
-        public Reservation Reservation { get; set; }
     }
 }

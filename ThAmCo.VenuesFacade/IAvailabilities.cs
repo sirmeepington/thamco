@@ -8,7 +8,7 @@ namespace ThAmCo.VenuesFacade
 {
     public interface IAvailabilities
     {
-        Task<AvailabilityDto> GetAvailability(string type, DateTime from, DateTime to);
+        Task<List<AvailabilityDto>> GetAvailabilities(string type, DateTime from, DateTime to);
 
     }
 }

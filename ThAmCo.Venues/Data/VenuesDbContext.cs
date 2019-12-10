@@ -103,7 +103,7 @@ namespace ThAmCo.Venues.Data
                        );
 
                 var rand = new Random(0);
-                var startDate = new DateTime(2018, 10, 28);
+                var startDate = new DateTime(2016, 10, 28);
                 var dates = new List<Availability>();
                 var venues = new [] {
                     new { Venue = "FDLCK", Cost = 30.0 },
