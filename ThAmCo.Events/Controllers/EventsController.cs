@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using ThAmCo.Events.Data;
 using ThAmCo.Events.Models;
 using ThAmCo.Venues.Data;
+using ThAmCo.Venues.Models;
 using ThAmCo.VenuesFacade;
 
 namespace ThAmCo.Events.Controllers
@@ -15,12 +16,14 @@ namespace ThAmCo.Events.Controllers
     public class EventsController : Controller
     {
         private readonly EventsDbContext _context;
-        private readonly IAvailabilities _availabilities;
+        private readonly IVenueAvailabilities _availabilities;
+        private readonly IVenueReservation _reservations;
 
-        public EventsController(EventsDbContext context, IAvailabilities availabilities)
+        public EventsController(EventsDbContext context, IVenueAvailabilities availabilities, IVenueReservation reservations)
         {
             _context = context;
             _availabilities = availabilities;
+            _reservations = reservations;
         }
 
         // GET: Events
@@ -56,10 +59,33 @@ namespace ThAmCo.Events.Controllers
             if (@event == null)
                 return NotFound();
 
-            AvailabilityDto eventAvailability = await _availabilities.GetAvailability(
-                                                @event.TypeId,
-                                                @event.Date,
-                                                @event.Date.Add(@event.Duration.Value));
+            EventDetailsViewModel viewModel = new EventDetailsViewModel()
+            {
+                Id = @event.Id,
+                Title = @event.Title,
+                Date = @event.Date,
+                Duration = @event.Duration,
+                TypeId = @event.TypeId,
+                Bookings = await _context.Guests.Include(e => e.Customer).Include(e => e.Event).Where(e => e.EventId == id).ToListAsync(),
+            };
+            
+            return View(viewModel);
+        }
+
+        public async Task<IActionResult> Venue(int? id)
+        {
+            if (!id.HasValue)
+                return NotFound();
+
+            Event @event = await _context.Events
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (@event == null)
+                return NotFound();
+
+            Availability eventAvailability = await _availabilities.GetAvailability(
+                                               @event.TypeId,
+                                               @event.Date,
+                                               @event.Date.Add(@event.Duration.Value));
             Availability availability = new Availability()
             {
                 Date = eventAvailability.Date,
@@ -69,18 +95,33 @@ namespace ThAmCo.Events.Controllers
                 VenueCode = eventAvailability.VenueCode
             };
 
-            EventDetailsViewModel viewModel = new EventDetailsViewModel()
+            EventVenueViewModel vm = new EventVenueViewModel()
             {
-                Id = @event.Id,
-                Title = @event.Title,
                 Date = @event.Date,
                 Duration = @event.Duration,
+                Id = @event.Id,
+                Title = @event.Title,
                 TypeId = @event.TypeId,
-                Bookings = await _context.Guests.Include(e => e.Customer).Include(e => e.Event).Where(e => e.EventId == id).ToListAsync(),
-                BookingInfo = availability
+                BookingInfo = await _availabilities.GetAvailability(@event.TypeId, @event.Date, @event.Date.Add(@event.Duration.Value)),
             };
-            
-            return View(viewModel);
+
+            if (vm.BookingInfo != null) {
+                ReservationGetDto res = await _reservations.GetReservation(vm.BookingInfo.VenueCode, vm.Date);
+                if (res != null)
+                {
+                    vm.Reservation = new Reservation()
+                    {
+                        VenueCode = res.VenueCode,
+                        Availability = vm.BookingInfo,
+                        EventDate = res.EventDate,
+                        Reference = res.Reference,
+                        StaffId = res.StaffId,
+                        WhenMade = res.WhenMade
+                    };
+                }
+            }
+
+            return View(vm);
         }
 
         // GET: Events/Create

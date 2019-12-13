@@ -1,0 +1,58 @@
+﻿@model ThAmCo.Events.Models.EventVenueViewModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h2>Event: @Model.Title</h2>
+
+<div>
+    <hr />
+    <h4>Event Details</h4>
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Title)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Title)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Date)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Date)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Duration)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Duration)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.TypeId)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.TypeId)
+        </dd>
+    </dl>
+    <hr />
+    <h4>Venue Details</h4>
+    @if (Model.Reservation == null)
+    {
+        <h6>No Reservation found for current Event.</h6>
+    }
+    else
+    {
+        <dl>
+            <dt>
+                @Html.DisplayNameFor(model => model.Reservation);
+            </dt>
+            <dd>
+            </dd>
+        </dl>
+    }
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

@@ -6,7 +6,7 @@ using ThAmCo.Venues.Data;
 
 namespace ThAmCo.Events.Models
 {
-    public class EventDetailsViewModel
+    public class EventVenueViewModel
     {
         public int Id { get; set; }
 
@@ -21,7 +21,8 @@ namespace ThAmCo.Events.Models
         [Display(Name = "Event Type")]
         public string TypeId { get; set; }
 
-        public List<GuestBooking> Bookings { get; set; }
+        public Availability BookingInfo { get; set; }
 
+        public Reservation Reservation { get; set; }
     }
 }

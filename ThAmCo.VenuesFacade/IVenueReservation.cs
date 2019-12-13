@@ -6,7 +6,7 @@ using ThAmCo.Venues.Models;
 
 namespace ThAmCo.VenuesFacade
 {
-    public interface IReservation
+    public interface IVenueReservation
     {
 
         Task<ReservationGetDto> GetReservation(string venueCode, DateTime startDate);

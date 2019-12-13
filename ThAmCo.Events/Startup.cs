@@ -38,8 +38,8 @@ namespace ThAmCo.Events
                 var cs = Configuration.GetConnectionString("EventsSqlConnection");
                 options.UseSqlServer(cs);
             });
-            services.AddScoped<IAvailabilities, Availabilities>();
-            services.AddScoped<IReservation, Reservation>();
+            services.AddScoped<IVenueAvailabilities, VenueAvailabilities>();
+            services.AddScoped<IVenueReservation, VenueReservation>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

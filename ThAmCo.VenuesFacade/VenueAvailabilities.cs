@@ -9,15 +9,15 @@ using ThAmCo.Venues.Data;
 
 namespace ThAmCo.VenuesFacade
 {
-    public class Availabilities : IAvailabilities
+    public class VenueAvailabilities : IVenueAvailabilities
     {
 
-        private readonly ILogger<Availabilities> _logger;
+        private readonly ILogger<VenueAvailabilities> _logger;
         private readonly IConfiguration _config;
 
         private HttpClient client = null;
 
-        public Availabilities(ILogger<Availabilities> logger, IConfiguration config)
+        public VenueAvailabilities(ILogger<VenueAvailabilities> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
@@ -37,31 +37,31 @@ namespace ThAmCo.VenuesFacade
             return true;
         }
 
-        public async Task<AvailabilityDto> GetAvailability(string eventType, DateTime from, DateTime to)
+        public async Task<Availability> GetAvailability(string eventType, DateTime from, DateTime to)
         {
             if (!EnsureClient()) {
-                return new AvailabilityDto();
+                return new Availability();
             }
-            AvailabilityDto venue;
+            Availability venue;
             try
             {
                 var query = HttpUtility.ParseQueryString(string.Empty);
                 query["eventType"] = eventType;
-                query["beginDate"] = from.ToString();
-                query["endDate"] = to.ToString();
+                query["beginDate"] = from.ToString("o");
+                query["endDate"] = to.ToString("o");
                 var response = await client.GetAsync("api/availability?"+query.ToString());
                 response.EnsureSuccessStatusCode();
                 string responseStr = await response.Content.ReadAsStringAsync();
-                List<AvailabilityDto> venues = await response.Content.ReadAsAsync<List<AvailabilityDto>>();
+                List<Availability> venues = await response.Content.ReadAsAsync<List<Availability>>();
                 if (venues.Count > 0)
                     venue = venues[0];
                 else
-                    venue = new AvailabilityDto();
+                    venue = new Availability();
             } catch (HttpRequestException ex)
             {
                 _logger.LogError(
                     "Failed to receive venue from Venues server. Exception: " + ex.ToString());
-                venue = new AvailabilityDto();
+                venue = new Availability();
             }
             return venue;
         }

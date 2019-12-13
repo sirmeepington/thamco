@@ -5,9 +5,9 @@ namespace ThAmCo.Events.Controllers
 {
     public class VenuesController : Controller
     {
-        private readonly IReservation _reservations;
+        private readonly IVenueReservation _reservations;
 
-        public VenuesController(IReservation reservations)
+        public VenuesController(IVenueReservation reservations)
         {
             _reservations = reservations;
         }

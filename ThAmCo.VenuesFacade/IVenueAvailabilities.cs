@@ -6,9 +6,9 @@ using ThAmCo.Venues.Data;
 
 namespace ThAmCo.VenuesFacade
 {
-    public interface IAvailabilities
+    public interface IVenueAvailabilities
     {
-        Task<AvailabilityDto> GetAvailability(string type, DateTime from, DateTime to);
+        Task<Availability> GetAvailability(string type, DateTime from, DateTime to);
 
     }
 }

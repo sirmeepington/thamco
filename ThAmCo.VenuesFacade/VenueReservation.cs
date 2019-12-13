@@ -10,13 +10,13 @@ using ThAmCo.Venues.Models;
 
 namespace ThAmCo.VenuesFacade
 {
-    public class Reservation : IReservation
+    public class VenueReservation : IVenueReservation
     {
-        private ILogger<Reservation> _logger;
+        private ILogger<VenueReservation> _logger;
         private IConfiguration _config;
         private HttpClient client = null;
 
-        public Reservation(ILogger<Reservation> logger, IConfiguration config)
+        public VenueReservation(ILogger<VenueReservation> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
@@ -59,6 +59,35 @@ namespace ThAmCo.VenuesFacade
             } catch (HttpRequestException ex)
             {
                 _logger.LogError("Caught an error when accessing a reservation at reference " + reference + ". Exception: " + ex);
+                reservation = new ReservationGetDto();
+            }
+
+            return reservation;
+        }
+
+        public async Task<ReservationGetDto> CreateReservation(DateTime eventDate, string venueCode)
+        {
+            if (!EnsureClient())
+            {
+                return null;
+            }
+
+            ReservationPostDto reservationDetails = new ReservationPostDto()
+            {
+                EventDate = eventDate,
+                StaffId = "1",
+                VenueCode = venueCode
+            };
+
+            ReservationGetDto reservation;
+            try
+            {
+                var response = await client.PostAsJsonAsync("api/reservation", reservationDetails);
+                response.EnsureSuccessStatusCode();
+                reservation = await response.Content.ReadAsAsync<ReservationGetDto>();
+            } catch (HttpRequestException ex)
+            {
+                _logger.LogError("Caught an error when creating a reservation for event on " + eventDate.ToString("o") + ". Exception: " + ex);
                 reservation = new ReservationGetDto();
             }
 
