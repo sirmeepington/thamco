@@ -9,6 +9,7 @@ namespace ThAmCo.VenuesFacade
     public interface IVenueAvailabilities
     {
         Task<Availability> GetAvailability(string type, DateTime from, DateTime to);
+        Task<List<Availability>> GetAvailabilities(string type, DateTime from, DateTime to);
 
     }
 }

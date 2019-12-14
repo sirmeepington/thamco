@@ -57,7 +57,7 @@ namespace ThAmCo.Events.Data
                 );
 
                 builder.Entity<Event>().HasData(
-                    new Event { Id = 1, Title = "Bob's Big 50", Date = new DateTime(2016, 4, 12), Duration = new TimeSpan(6, 0, 0), TypeId = "PTY" },
+                    new Event { Id = 1, Title = "Bob's Big 50", Date = new DateTime(2018, 11, 12), Duration = new TimeSpan(6, 0, 0), TypeId = "PTY" },
                     new Event { Id = 2, Title = "Best Wedding Yet", Date = new DateTime(2018, 12, 1), Duration = new TimeSpan(12, 0, 0), TypeId = "WED" }
                 );
 

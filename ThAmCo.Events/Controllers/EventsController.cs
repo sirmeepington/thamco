@@ -161,11 +161,15 @@ namespace ThAmCo.Events.Controllers
             if (@event == null)
                 return NotFound();
 
+            List<Availability> availabilities = await _availabilities.GetAvailabilities(@event.TypeId, @event.Date, @event.Date.Add(@event.Duration.Value));
+            SelectList applicableVenues = new SelectList(availabilities,"Code","Name",availabilities.FirstOrDefault());
+
             EventEditViewModel eventEditViewModel = new EventEditViewModel()
             {
                 Duration = @event.Duration,
                 Id = @event.Id,
-                Title = @event.Title
+                Title = @event.Title,
+                ApplicableVenues = applicableVenues
             };
             return View(eventEditViewModel);
         }
@@ -175,7 +179,7 @@ namespace ThAmCo.Events.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Duration")] EventEditViewModel @event)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Duration,VenueToReserve")] EventEditViewModel @event)
         {
             if (id != @event.Id)
                 return NotFound();
@@ -184,9 +188,28 @@ namespace ThAmCo.Events.Controllers
             {
                 try
                 {
+
                     Event e = await _context.Events.FirstOrDefaultAsync(dbEvent => dbEvent.Id == @event.Id);
                     if (e == null)
                         return BadRequest();
+
+                    // Reservation
+                    Availability eventDto = @event.VenueToReserve;
+                    if (eventDto != null)
+                    {
+                        ReservationGetDto re = await _reservations.GetReservation(eventDto.Code, e.Date);
+                        if (re == null)
+                        {
+                            // No reservation. Try and make one.
+                            re = await _reservations.CreateReservation(re.Reference, e.Date, eventDto.Code);
+                        }
+                        else
+                        {
+                            await _reservations.CancelReservation(re.Reference);
+                            re = await _reservations.CreateReservation(re.Reference, e.Date, eventDto.Code);
+                        }
+                    }
+                    // End Reservation
 
                     e.Duration = @event.Duration;
                     e.Title = @event.Title;

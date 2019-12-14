@@ -78,20 +78,22 @@ namespace ThAmCo.VenuesFacade
                 StaffId = "1",
                 VenueCode = venueCode
             };
-
             ReservationGetDto reservation;
-            try
-            {
+            try { 
                 var response = await client.PostAsJsonAsync("api/reservation", reservationDetails);
                 response.EnsureSuccessStatusCode();
                 reservation = await response.Content.ReadAsAsync<ReservationGetDto>();
             } catch (HttpRequestException ex)
             {
-                _logger.LogError("Caught an error when creating a reservation for event on " + eventDate.ToString("o") + ". Exception: " + ex);
+                _logger.LogError("Caught an error when creating a reservation. Exception: " + ex);
                 reservation = new ReservationGetDto();
             }
-
             return reservation;
+        }
+
+        public Task<bool> CancelReservation(string reference)
+        {
+            return Task.FromResult(true);
         }
     }
 }

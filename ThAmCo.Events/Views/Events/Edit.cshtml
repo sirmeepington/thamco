@@ -24,6 +24,16 @@
                 <span asp-validation-for="Duration" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="ApplicableVenues" class="control-label"></label>
+                @if (Model.ApplicableVenues.Count() > 0)
+                {
+                    @Html.DropDownListFor(x => x.VenueToReserve, Model.ApplicableVenues, new { @class = "form-control" })
+                } else
+                {
+                    <h5>No applicable venues found.</h5>
+                }
+            </div>
+            <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-default" />
             </div>
         </form>
