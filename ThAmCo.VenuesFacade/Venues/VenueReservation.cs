@@ -29,7 +29,9 @@ namespace ThAmCo.VenuesFacade
 
             client = new HttpClient()
             {
+#if DEBUG
                 BaseAddress = new Uri(_config["VenuesBaseUrl"]),
+#endif
                 Timeout = TimeSpan.FromSeconds(5)
             };
             client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
@@ -38,11 +40,15 @@ namespace ThAmCo.VenuesFacade
 
         public async Task<ReservationGetDto> GetReservation(string venueCode, DateTime startDate)
         {
+            return await GetReservation($"{venueCode}{startDate:yyyyMMdd}");
+        }
+
+        public async Task<ReservationGetDto> GetReservation(string reference)
+        {
             if (!EnsureClient())
                 return null;
 
             // ref = $"{availability.VenueCode}{availability.Date:yyyyMMdd}"
-            string reference = $"{venueCode}{startDate:yyyyMMdd}";
             ReservationGetDto reservation;
             try
             {
@@ -56,7 +62,8 @@ namespace ThAmCo.VenuesFacade
                     reservation = reservations[0];
                 else
                     reservation = new ReservationGetDto();
-            } catch (HttpRequestException ex)
+            }
+            catch (HttpRequestException ex)
             {
                 _logger.LogError("Caught an error when accessing a reservation at reference " + reference + ". Exception: " + ex);
                 reservation = new ReservationGetDto();

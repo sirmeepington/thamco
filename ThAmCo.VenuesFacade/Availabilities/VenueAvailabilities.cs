@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 using ThAmCo.Venues.Data;
+using ThAmCo.VenuesFacade.Availabilities;
 
 namespace ThAmCo.VenuesFacade
 {
@@ -37,29 +38,29 @@ namespace ThAmCo.VenuesFacade
             return true;
         }
 
-        public async Task<List<Availability>> GetAvailabilities(string eventType, DateTime from, DateTime to)
+        public async Task<List<AvailabilityApiGetDto>> GetAvailabilities(string eventType, DateTime from, DateTime to)
         {
             if (!EnsureClient()) {
-                return new List<Availability>();
+                return new List<AvailabilityApiGetDto>();
             }
-            List<Availability> venue;
+            List<AvailabilityApiGetDto> venue;
             try
             {
                 var query = HttpUtility.ParseQueryString(string.Empty);
                 query["eventType"] = eventType;
-                query["beginDate"] = from.ToString("o");
-                query["endDate"] = to.ToString("o");
+                query["beginDate"] = $"{from:yyyy-MM-dd}";
+                query["endDate"] = $"{to:yyyy-MM-dd}";
                 var response = await client.GetAsync("api/availability?"+query.ToString());
                 response.EnsureSuccessStatusCode();
                 string responseStr = await response.Content.ReadAsStringAsync();
-                List<Availability> venues = await response.Content.ReadAsAsync<List<Availability>>();
+                List<AvailabilityApiGetDto> venues = await response.Content.ReadAsAsync<List<AvailabilityApiGetDto>>();
                 venue = venues;
             } catch (HttpRequestException ex)
             {
 
                 _logger.LogError(
                     "Failed to receive venue from Venues server. Exception: " + ex.ToString());
-                venue = new List<Availability>();
+                venue = new List<AvailabilityApiGetDto>();
             }
             return venue;
         }

@@ -10,6 +10,7 @@ using ThAmCo.Events.Models;
 using ThAmCo.Venues.Data;
 using ThAmCo.Venues.Models;
 using ThAmCo.VenuesFacade;
+using ThAmCo.VenuesFacade.Availabilities;
 
 namespace ThAmCo.Events.Controllers
 {
@@ -72,6 +73,7 @@ namespace ThAmCo.Events.Controllers
             return View(viewModel);
         }
 
+        [HttpGet]
         public async Task<IActionResult> Venue(int? id)
         {
             if (!id.HasValue)
@@ -82,45 +84,84 @@ namespace ThAmCo.Events.Controllers
             if (@event == null)
                 return NotFound();
 
-            Availability eventAvailability = (await _availabilities.GetAvailabilities(
-                                               @event.TypeId,
-                                               @event.Date,
-                                               @event.Date.Add(@event.Duration.Value))).FirstOrDefault();
-            
-            Availability availability = new Availability()
+
+            List<AvailabilityApiGetDto> apiGetDtoList = await _availabilities.GetAvailabilities(@event.TypeId, @event.Date, @event.Date.Add(@event.Duration.Value));
+
+            List<Availability> availabilities = apiGetDtoList
+                .Select(x => new Availability
+                {
+                    CostPerHour = x.CostPerHour,
+                    Date = x.Date,
+                    VenueCode = x.Code,
+                    Venue = new Venue
+                    {
+                        Code = x.Code,
+                        Description = x.Description,
+                        Name = x.Name,
+                        Capacity = x.Capacity
+                    }
+                }).ToList();
+
+            if (@event.VenueReservation == null)
             {
-                Date = eventAvailability.Date,
-                CostPerHour = eventAvailability.CostPerHour,
-                Reservation = eventAvailability.Reservation,
-                Venue = eventAvailability.Venue,
-                VenueCode = eventAvailability.VenueCode
-            };
+                EventVenueViewModel novenue = new EventVenueViewModel()
+                {
+                    Title = @event.Title,
+                    Date = @event.Date,
+                    Duration = @event.Duration,
+                    Id = @event.Id,
+                    TypeId = @event.TypeId,
+                    Availabilities = availabilities,
+                    AvailabilitiesSelectList = new SelectList(availabilities.Select(x => new { x.Venue.Name, x.VenueCode, x.Date, x.CostPerHour }),"VenueCode", "Name")
+                };
+                return View(novenue);
+            }
+
+            ReservationGetDto resDto = await _reservations.GetReservation(@event.VenueReservation);
+            Reservation res = null;
+
+            AvailabilityApiGetDto apiGetDto = apiGetDtoList.FirstOrDefault();
+            Venue venue = null;
+            if (apiGetDto != null && resDto.Reference != null)
+            {
+                venue = new Venue()
+                {
+                    Code = apiGetDto.Code,
+                    Name = apiGetDto.Name,
+                    Description = apiGetDto.Description,
+                    Capacity = apiGetDto.Capacity,
+                };
+                res = new Reservation()
+                {
+                    Reference = resDto.Reference,
+                    VenueCode = resDto.VenueCode,
+                    WhenMade = resDto.WhenMade,
+                    StaffId = resDto.StaffId,
+                    EventDate = resDto.EventDate,
+                    Availability = new Availability()
+                    {
+                        CostPerHour = apiGetDto.CostPerHour,
+                        VenueCode = apiGetDto.Code,
+                        Date = apiGetDto.Date,
+                        Venue = venue
+                    }
+
+                };
+            }
+
 
             EventVenueViewModel vm = new EventVenueViewModel()
             {
+                Title = @event.Title,
                 Date = @event.Date,
                 Duration = @event.Duration,
                 Id = @event.Id,
-                Title = @event.Title,
                 TypeId = @event.TypeId,
-                BookingInfo = (await _availabilities.GetAvailabilities(@event.TypeId, @event.Date, @event.Date.Add(@event.Duration.Value))).FirstOrDefault(),
+                Venue = venue,
+                Reservation = res,
+                Availabilities = availabilities
             };
-
-            if (vm.BookingInfo != null) {
-                ReservationGetDto res = await _reservations.GetReservation(vm.BookingInfo.VenueCode, vm.Date);
-                if (res != null)
-                {
-                    vm.Reservation = new Reservation()
-                    {
-                        VenueCode = res.VenueCode,
-                        Availability = vm.BookingInfo,
-                        EventDate = res.EventDate,
-                        Reference = res.Reference,
-                        StaffId = res.StaffId,
-                        WhenMade = res.WhenMade
-                    };
-                }
-            }
+            
 
             return View(vm);
         }
@@ -162,8 +203,26 @@ namespace ThAmCo.Events.Controllers
             if (@event == null)
                 return NotFound();
 
-            List<Availability> availabilities = await _availabilities.GetAvailabilities(@event.TypeId, @event.Date, @event.Date.Add(@event.Duration.Value));
-            SelectList applicableVenues = new SelectList(availabilities,"VenueCode","Name",availabilities.FirstOrDefault());
+            List<AvailabilityApiGetDto> apiGetDtos = await _availabilities.GetAvailabilities(@event.TypeId, @event.Date, @event.Date.Add(@event.Duration.Value));
+            List<Availability> availabilities = new List<Availability>();
+            foreach(AvailabilityApiGetDto avail in apiGetDtos)
+            {
+                availabilities.Add(new Availability()
+                {
+                    CostPerHour = avail.CostPerHour,
+                    Date = avail.Date,
+                    VenueCode = avail.Code,
+                    Venue = new Venue()
+                    {
+                        Code = avail.Code,
+                        Name = avail.Name,
+                        Description = avail.Description,
+                        Capacity = avail.Capacity
+                    }
+                });
+            }
+
+            SelectList applicableVenues = new SelectList(availabilities,"Code","Name",availabilities.FirstOrDefault());
 
             EventEditViewModel eventEditViewModel = new EventEditViewModel()
             {

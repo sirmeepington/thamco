@@ -9,50 +9,88 @@
 <div>
     <hr />
     <h4>Event Details</h4>
-    <dl class="dl-horizontal">
+    <dl>
         <dt>
-            @Html.DisplayNameFor(model => model.Title)
+            @Html.DisplayNameFor(model => model.TypeId);
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.Title)
+            <span id="typeId">@Html.DisplayFor(model => model.TypeId)</span>
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.Date)
+            @Html.DisplayNameFor(model => model.Date);
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.Date)
+            <span id="beginDate">@Html.DisplayFor(model => model.Date)</span>
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.Duration)
+            @Html.DisplayNameFor(model => model.Duration);
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.Duration)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.TypeId)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.TypeId)
+            <span id="duration">@Html.DisplayFor(model => model.Duration)</span>
         </dd>
     </dl>
-    <hr />
     <h4>Venue Details</h4>
-    @if (Model.Reservation == null || Model.Reservation.Reference == null)
+    @if (Model.Venue == null || Model.Reservation == null)
     {
-        <h6>No Reservation found for current Event.</h6>
-        <button class="btn btn-default">Reserve a venue</button>
-        <br/>
+        <h6>No venue reservation found for current Event.</h6>
+        @if (Model.Availabilities.Count > 0)
+        {
+            <h6>However, we found these availabilities: </h6>
+            @Html.DropDownListFor(model => model.SelectedVenue, Model.AvailabilitiesSelectList, "Please choose a venue.", new { id = "venueSelect", form = "menuForm", @class = "form-control" })
+            <br />
+            <p id="venueinfo">Selected venue information will be shown here.</p>
+            <br />
+            <form asp-action="Venue" id="menuForm">
+                <input type="hidden" />
+            </form>
+
+            <button class="btn btn-default">Reserve.</button>
+        }
+        else
+        {
+            <h6>No venue availabilities were found for this day, Sorry.</h6>
+        }
+        <br />
     }
     else
     {
+        <h5>Venue:</h5>
         <dl>
             <dt>
-                @Html.DisplayNameFor(model => model.Reservation);
+                @Html.DisplayNameFor(model => model.Venue.Name);
             </dt>
             <dd>
-                @Html.DisplayFor(model => model.Reservation);
+                @Html.DisplayFor(model => model.Venue.Name);
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Venue.Description);
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Venue.Description);
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Venue.Capacity);
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Venue.Capacity);
             </dd>
         </dl>
+        <h5>Reservation:</h5>
+        <dl>
+            <dt>
+                @Html.DisplayNameFor(model => model.Reservation.WhenMade);
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Reservation.WhenMade);
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Reservation.Reference);
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Reservation.Reference);
+            </dd>
+        </dl>
+
     }
     <hr />
 </div>
@@ -60,3 +98,21 @@
     <a asp-action="Edit" class="btn btn-warning" asp-route-id="@Model.Id"><span class="glyphicon glyphicon-pencil"></span> Edit</a> |
     <a asp-action="Index" class="btn btn-default">Back to List</a>
 </div>
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#venueSelect').on('change', function () {
+                var selected = $(this).find('option:selected');
+                var id = selected.text();
+                var eventType = $('#typeId').text();
+                var date = $('#beginDate').text();
+                $.get(("https://localhost:23652/api/availability?eventType=" + eventType + "&beginDate=" + date + "&endDate=" + date), function (res) {
+                    console.log("sent");
+                    console.log(res);
+                });
+            });
+        });
+    </script>
+}

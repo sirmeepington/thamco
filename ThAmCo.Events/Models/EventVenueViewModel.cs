@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using ThAmCo.Events.Data;
@@ -21,8 +22,14 @@ namespace ThAmCo.Events.Models
         [Display(Name = "Event Type")]
         public string TypeId { get; set; }
 
-        public Availability BookingInfo { get; set; }
+        public Venue Venue { get; set; }
 
         public Reservation Reservation { get; set; }
+
+        public List<Availability> Availabilities { get; set; }
+
+        public SelectList AvailabilitiesSelectList { get; set; }
+
+        public int SelectedVenue { get; set; }
     }
 }

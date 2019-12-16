@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+using ThAmCo.Venues.Data;
 
 namespace ThAmCo.Events.Data
 {
@@ -17,5 +17,7 @@ namespace ThAmCo.Events.Data
         public string TypeId { get; set; }
 
         public List<GuestBooking> Bookings { get; set; }
+
+        public string VenueReservation { get; set; }
     }
 }
