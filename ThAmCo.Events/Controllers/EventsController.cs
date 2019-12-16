@@ -82,10 +82,11 @@ namespace ThAmCo.Events.Controllers
             if (@event == null)
                 return NotFound();
 
-            Availability eventAvailability = await _availabilities.GetAvailability(
+            Availability eventAvailability = (await _availabilities.GetAvailabilities(
                                                @event.TypeId,
                                                @event.Date,
-                                               @event.Date.Add(@event.Duration.Value));
+                                               @event.Date.Add(@event.Duration.Value))).FirstOrDefault();
+            
             Availability availability = new Availability()
             {
                 Date = eventAvailability.Date,
@@ -102,7 +103,7 @@ namespace ThAmCo.Events.Controllers
                 Id = @event.Id,
                 Title = @event.Title,
                 TypeId = @event.TypeId,
-                BookingInfo = await _availabilities.GetAvailability(@event.TypeId, @event.Date, @event.Date.Add(@event.Duration.Value)),
+                BookingInfo = (await _availabilities.GetAvailabilities(@event.TypeId, @event.Date, @event.Date.Add(@event.Duration.Value))).FirstOrDefault(),
             };
 
             if (vm.BookingInfo != null) {
@@ -162,7 +163,7 @@ namespace ThAmCo.Events.Controllers
                 return NotFound();
 
             List<Availability> availabilities = await _availabilities.GetAvailabilities(@event.TypeId, @event.Date, @event.Date.Add(@event.Duration.Value));
-            SelectList applicableVenues = new SelectList(availabilities,"Code","Name",availabilities.FirstOrDefault());
+            SelectList applicableVenues = new SelectList(availabilities,"VenueCode","Name",availabilities.FirstOrDefault());
 
             EventEditViewModel eventEditViewModel = new EventEditViewModel()
             {
@@ -197,16 +198,16 @@ namespace ThAmCo.Events.Controllers
                     Availability eventDto = @event.VenueToReserve;
                     if (eventDto != null)
                     {
-                        ReservationGetDto re = await _reservations.GetReservation(eventDto.Code, e.Date);
+                        ReservationGetDto re = await _reservations.GetReservation(eventDto.VenueCode, e.Date);
                         if (re == null)
                         {
                             // No reservation. Try and make one.
-                            re = await _reservations.CreateReservation(re.Reference, e.Date, eventDto.Code);
+                            re = await _reservations.CreateReservation(e.Date, eventDto.VenueCode);
                         }
                         else
                         {
                             await _reservations.CancelReservation(re.Reference);
-                            re = await _reservations.CreateReservation(re.Reference, e.Date, eventDto.Code);
+                            re = await _reservations.CreateReservation(e.Date, eventDto.VenueCode);
                         }
                     }
                     // End Reservation

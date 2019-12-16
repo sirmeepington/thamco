@@ -89,13 +89,8 @@ namespace ThAmCo.Events.Data.Migrations
                 columns: new[] { "Id", "Date", "Duration", "Title", "TypeId" },
                 values: new object[,]
                 {
-<<<<<<< HEAD
                     { 1, new DateTime(2018, 12, 20, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 6, 0, 0, 0), "Bob's Big 50", "PTY" },
                     { 2, new DateTime(2019, 1, 12, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 12, 0, 0, 0), "Best Wedding Yet", "WED" }
-=======
-                    { 1, new DateTime(2018, 11, 12, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 6, 0, 0, 0), "Bob's Big 50", "PTY" },
-                    { 2, new DateTime(2018, 12, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 12, 0, 0, 0), "Best Wedding Yet", "WED" }
->>>>>>> 07fd791106061d6a5249cba716891de8a6287089
                 });
 
             migrationBuilder.InsertData(

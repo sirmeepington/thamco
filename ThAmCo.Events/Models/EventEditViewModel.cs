@@ -16,7 +16,7 @@ namespace ThAmCo.Events.Models
 
         public TimeSpan? Duration { get; set; }
 
-        public AvailabilityDto VenueToReserve { get; set; }
+        public Availability VenueToReserve { get; set; }
 
         [Display(Name = "Change Venue")]
         public SelectList ApplicableVenues { get; set; }

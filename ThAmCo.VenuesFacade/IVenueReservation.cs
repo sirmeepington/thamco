@@ -13,7 +13,7 @@ namespace ThAmCo.VenuesFacade
 
         Task<bool> CancelReservation(string reference);
 
-        Task<ReservationGetDto> CreateReservation(string reference, DateTime date, string venue);
+        Task<ReservationGetDto> CreateReservation(DateTime date, string venue);
         
     }
 }

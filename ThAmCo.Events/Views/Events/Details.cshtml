@@ -79,26 +79,7 @@
                 }
             </dd>
         }
-
-    </dl><h4>Venue Details</h4>
-    @if (Model.BookingInfo == null || Model.BookingInfo.Venue == null)
-    {
-        <h5>There is no venue booked for this Event.</h5>
-        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-default">Book venue.</a>
-    }
-    else
-    {
-        <h5>The venue @Model.BookingInfo.Venue.Name has been booked for this event.</h5>
-        <h6>Venue information:</h6>
-        <dl class="dl-horizontal">
-            <dt>Venue Name</dt>
-            <dd>@Model.BookingInfo.Venue.Name</dd>
-            <dt>Venue Description</dt>
-            <dd>@Model.BookingInfo.Venue.Description</dd>
-            <dt>Cost per Hour</dt>
-            <dd>£@Model.BookingInfo.CostPerHour</dd>
-        </dl>
-    }
+    </dl>
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
