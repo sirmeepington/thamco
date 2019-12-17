@@ -38,13 +38,13 @@
             <h6>However, we found these availabilities: </h6>
             @Html.DropDownListFor(model => model.SelectedVenue, Model.AvailabilitiesSelectList, "Please choose a venue.", new { id = "venueSelect", form = "menuForm", @class = "form-control" })
             <br />
-            <p id="venueinfo">Selected venue information will be shown here.</p>
-            <br />
+            <p id="venueInfo">Selected venue information will be shown here.</p>
             <form asp-action="Venue" id="menuForm">
-                <input type="hidden" />
+                <input type="hidden" id="formCode" name="venueCode" />
+                <input type="hidden" id="formDate" name="eventDate" />
+                <input type="submit" id="reserveButton" disabled="disabled" class="btn btn-default" value="Reserve"/>
             </form>
 
-            <button class="btn btn-default">Reserve.</button>
         }
         else
         {
@@ -103,14 +103,43 @@
     <script src="~/lib/jquery/dist/jquery.js"></script>
     <script>
         $(document).ready(function () {
+            var eventType = $('#typeId').text();
+            var datestr = $('#beginDate').text();
+            var duration = $('#duration').text();
+            duration = duration.replace(/[a-z]{1}/g, "").split(" ");
+            datestr = datestr.substring(0, 10).split("/"); // https://stackoverflow.com/questions/1144783/how-to-replace-all-occurrences-of-a-string
+            $('#formDate').val(datestr);
+
             $('#venueSelect').on('change', function () {
                 var selected = $(this).find('option:selected');
-                var id = selected.text();
-                var eventType = $('#typeId').text();
-                var date = $('#beginDate').text();
-                $.get(("https://localhost:23652/api/availability?eventType=" + eventType + "&beginDate=" + date + "&endDate=" + date), function (res) {
-                    console.log("sent");
-                    console.log(res);
+                var name = selected.text();
+                var id = selected.val();
+                if (id == "") {
+                    $('#reserveButton').prop("disabled", "disabled");
+                    $('#venueInfo').text("Selected venue information will be shown here.");
+                    return;
+                }
+                $('#venueInfo').text("Getting info...");
+                var startdate = new Date(datestr[2], datestr[1]-1, datestr[0]);
+                var enddate = new Date(datestr[2], datestr[1] - 1, datestr[0], duration[0], duration[1], duration[2]);
+                $.get(("http://localhost:23652/api/availability?eventType=" + eventType + "&beginDate=" + startdate.toISOString() + "&endDate=" + enddate.toISOString()), function (res) {
+                    var venue;
+                    var venues = res;
+                    for (i = 0; i < venues.length; i++) {
+                        if (venues[i].code == id && venues[i].name == name) {
+                            venue = venues[i];
+                            break;
+                        }
+                    }
+
+                    if (venue === 'undefined') {
+                        $('#venueInfo').text("Apologies, something has went wrong!");
+                        return;
+                    }
+                    $('#venueInfo').html(
+                        "<dl><dt>Name:</dt><dd>" + venue.name + "</dd><dt>Description:</dt><dd>" + venue.description + "</dd><dt>Code Per Hour:</dt><dd>£" + venue.costPerHour+ "</dd><dt>Capacity:</dt><dd>" + venue.capacity + " people</dd></dl>"
+                    );
+                    $('#reserveButton').prop("disabled","");
                 });
             });
         });
