@@ -44,6 +44,8 @@ namespace ThAmCo.Venues.Controllers
                                            a.CostPerHour
                                        });
 
+            Response.Headers.Add("Access-Control-Allow-Origin", "*");
+
             return Ok(await avails.ToListAsync());
         }
     }
