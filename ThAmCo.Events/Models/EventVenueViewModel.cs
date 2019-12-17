@@ -30,6 +30,6 @@ namespace ThAmCo.Events.Models
 
         public SelectList AvailabilitiesSelectList { get; set; }
 
-        public int SelectedVenue { get; set; }
+        public string SelectedVenue { get; set; }
     }
 }

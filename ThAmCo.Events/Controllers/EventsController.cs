@@ -40,7 +40,6 @@ namespace ThAmCo.Events.Controllers
                     Duration = ev.Duration,
                     Id = ev.Id,
                     Title = ev.Title,
-                    Bookings = ev.Bookings,
                     TypeId = ev.TypeId
                 };
                 model.Add(temp);
@@ -67,7 +66,28 @@ namespace ThAmCo.Events.Controllers
                 Date = @event.Date,
                 Duration = @event.Duration,
                 TypeId = @event.TypeId,
-                Bookings = await _context.Guests.Include(e => e.Customer).Include(e => e.Event).Where(e => e.EventId == id).ToListAsync(),
+                Bookings = await _context.Guests.Include(e => e.Customer).Include(e => e.Event).Where(e => e.EventId == id).Select(x => new GuestBookingDetailsViewModel()
+                {
+                    Attended = x.Attended,
+                    Customer = new CustomerDetailsViewModel()
+                    {
+                        Email = x.Customer.Email,
+                        FirstName = x.Customer.FirstName,
+                        FullName = x.Customer.FullName,
+                        Id = x.Customer.Id,
+                        Surname = x.Customer.Surname
+                    },
+                    Event = new EventDetailsViewModel()
+                    {
+                        Id = x.Event.Id,
+                        Date = x.Event.Date,
+                        Duration = x.Event.Duration,
+                        Title = x.Event.Title,
+                        TypeId = x.Event.TypeId
+                    },
+                    CustomerId = x.CustomerId,
+                    EventId = x.EventId
+                }).ToListAsync(),
             };
             
             return View(viewModel);
@@ -102,6 +122,17 @@ namespace ThAmCo.Events.Controllers
                     }
                 }).ToList();
 
+            List<Availability> nonReserved = new List<Availability>();
+            foreach(Availability availability in availabilities)
+            {
+                ReservationGetDto reservations = await _reservations.GetReservation(availability.VenueCode, @event.Date);
+                if (reservations.Reference == null)
+                {
+                    nonReserved.Add(availability);
+                }
+            }
+            availabilities.Clear();
+
             if (@event.VenueReservation == null)
             {
                 EventVenueViewModel novenue = new EventVenueViewModel()
@@ -111,8 +142,8 @@ namespace ThAmCo.Events.Controllers
                     Duration = @event.Duration,
                     Id = @event.Id,
                     TypeId = @event.TypeId,
-                    Availabilities = availabilities,
-                    AvailabilitiesSelectList = new SelectList(availabilities.Select(x => new { x.Venue.Name, x.VenueCode, x.Date, x.CostPerHour }),"VenueCode", "Name")
+                    Availabilities = nonReserved,
+                    AvailabilitiesSelectList = new SelectList(nonReserved.Select(x => new { x.Venue.Name, x.VenueCode, x.Date, x.CostPerHour }),"VenueCode", "Name")
                 };
                 return View(novenue);
             }
@@ -166,6 +197,38 @@ namespace ThAmCo.Events.Controllers
             return View(vm);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Venue([Bind("TypeId,Date,SelectedVenue")] EventVenueViewModel ev)
+        {
+            if (!ModelState.IsValid)
+                return View(ev);
+
+            ReservationGetDto reservationGetDto = await _reservations.CreateReservation(ev.Date, ev.SelectedVenue);
+            if (reservationGetDto.Reference == null)
+                return BadRequest();
+
+            EventVenueViewModel model = new EventVenueViewModel()
+            {
+                Id = ev.Id,
+                Date = ev.Date,
+                Title = ev.Title,
+                Duration = ev.Duration,
+                TypeId = ev.TypeId,
+                Venue = ev.Venue,
+                Reservation = new Reservation()
+                {
+                    EventDate = reservationGetDto.EventDate,
+                    Reference = reservationGetDto.Reference,
+                    StaffId = reservationGetDto.StaffId,
+                    VenueCode = reservationGetDto.VenueCode,
+                    WhenMade = reservationGetDto.WhenMade
+                }
+            };
+
+            return View(model);
+        }
+
         // GET: Events/Create
         public IActionResult Create() => View();
 
@@ -176,21 +239,21 @@ namespace ThAmCo.Events.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Title,Date,Duration,TypeId")] EventCreateViewModel @event)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return View(@event);
+
+            Event e = new Event()
             {
-                Event e = new Event()
-                {
-                    Id = @event.Id,
-                    Date = @event.Date,
-                    Duration = @event.Duration,
-                    Title = @event.Title,
-                    TypeId = @event.TypeId
-                };
-                _context.Add(e);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(@event);
+                Id = @event.Id,
+                Date = @event.Date,
+                Duration = @event.Duration,
+                Title = @event.Title,
+                TypeId = @event.TypeId
+            };
+            _context.Add(e);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+            
         }
 
         // GET: Events/Edit/5

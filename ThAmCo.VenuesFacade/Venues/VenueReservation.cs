@@ -57,11 +57,7 @@ namespace ThAmCo.VenuesFacade
                 var response = await client.GetAsync("api/reservation?" + query.ToString());
                 response.EnsureSuccessStatusCode();
                 string responseStr = await response.Content.ReadAsStringAsync();
-                List<ReservationGetDto> reservations = await response.Content.ReadAsAsync<List<ReservationGetDto>>();
-                if (reservations.Count > 0)
-                    reservation = reservations[0];
-                else
-                    reservation = new ReservationGetDto();
+                reservation = await response.Content.ReadAsAsync<ReservationGetDto>();
             }
             catch (HttpRequestException ex)
             {

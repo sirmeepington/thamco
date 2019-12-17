@@ -4,9 +4,9 @@
     ViewData["Title"] = "Edit";
 }
 
-<h2>Edit</h2>
+<h2><span class="glyphicon glyphicon-pencil"></span> Edit Event</h2>
 
-<h4>Event #@Model.Id (@Model.Title)</h4>
+<h4>@Model.Title</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -24,16 +24,6 @@
                 <span asp-validation-for="Duration" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="ApplicableVenues" class="control-label"></label>
-                @if (Model.ApplicableVenues.Count() > 0)
-                {
-                    @Html.DropDownListFor(x => x.VenueToReserve, Model.ApplicableVenues, new { @class = "form-control" })
-                } else
-                {
-                    <h5>No applicable venues found.</h5>
-                }
-            </div>
-            <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-default" />
             </div>
         </form>
@@ -41,7 +31,8 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Venue" class="btn btn-warning"><span class="glyphicon glyphicon-pencil"></span> Edit Venue Information</a>
+    <a asp-action="Index" class="btn btn-default">Back to List</a>
 </div>
 
 @section Scripts {

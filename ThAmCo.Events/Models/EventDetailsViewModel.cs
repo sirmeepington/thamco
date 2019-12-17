@@ -21,7 +21,7 @@ namespace ThAmCo.Events.Models
         [Display(Name = "Event Type")]
         public string TypeId { get; set; }
 
-        public List<GuestBooking> Bookings { get; set; }
+        public List<GuestBookingDetailsViewModel> Bookings { get; set; }
 
     }
 }

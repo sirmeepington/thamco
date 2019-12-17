@@ -4,7 +4,7 @@
     ViewData["Title"] = "Details";
 }
 
-<h2>Event: @Model.Title</h2>
+<h2>Venue Details for @Model.Title</h2>
 
 <div>
     <hr />
@@ -29,26 +29,27 @@
             <span id="duration">@Html.DisplayFor(model => model.Duration)</span>
         </dd>
     </dl>
-    <h4>Venue Details</h4>
+    <h4>Reservation Details</h4>
     @if (Model.Venue == null || Model.Reservation == null)
     {
-        <h6>No venue reservation found for current Event.</h6>
+        <p>No venue reservation found for current Event.</p>
+        <hr/>
+        <h4>Availabilities</h4>
         @if (Model.Availabilities.Count > 0)
         {
-            <h6>However, we found these availabilities: </h6>
-            @Html.DropDownListFor(model => model.SelectedVenue, Model.AvailabilitiesSelectList, "Please choose a venue.", new { id = "venueSelect", form = "menuForm", @class = "form-control" })
+            <p>Found <b>@Model.Availabilities.Count</b> availabilities:</p>
+            @Html.DropDownListFor(model => Model.SelectedVenue, Model.AvailabilitiesSelectList, "Please choose a venue.", new { id = "venueSelect", form = "menuForm", @class = "form-control" })
             <br />
             <p id="venueInfo">Selected venue information will be shown here.</p>
-            <form asp-action="Venue" id="menuForm">
-                <input type="hidden" id="formCode" name="venueCode" />
-                <input type="hidden" id="formDate" name="eventDate" />
-                <input type="submit" id="reserveButton" disabled="disabled" class="btn btn-default" value="Reserve"/>
+            <form asp-action="Venue">
+                <input asp-for="Date" type="hidden" id="formDate" />
+                <input type="submit" id="reserveButton" disabled="disabled" class="btn btn-default" value="Reserve" />
             </form>
 
         }
         else
         {
-            <h6>No venue availabilities were found for this day, Sorry.</h6>
+            <p>No venue availabilities were found for this day, Sorry.</p>
         }
         <br />
     }
@@ -95,7 +96,7 @@
     <hr />
 </div>
 <div>
-    <a asp-action="Edit" class="btn btn-warning" asp-route-id="@Model.Id"><span class="glyphicon glyphicon-pencil"></span> Edit</a> |
+    <a asp-action="Edit" class="btn btn-warning" asp-route-id="@Model.Id"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
     <a asp-action="Index" class="btn btn-default">Back to List</a>
 </div>
 
@@ -137,7 +138,7 @@
                         return;
                     }
                     $('#venueInfo').html(
-                        "<dl><dt>Name:</dt><dd>" + venue.name + "</dd><dt>Description:</dt><dd>" + venue.description + "</dd><dt>Code Per Hour:</dt><dd>£" + venue.costPerHour+ "</dd><dt>Capacity:</dt><dd>" + venue.capacity + " people</dd></dl>"
+                        "<dl><dt>Name:</dt><dd>" + venue.name + "</dd><dt>Description:</dt><dd>" + venue.description + "</dd><dt>Code per Hour:</dt><dd>£" + venue.costPerHour+ "</dd><dt>Capacity:</dt><dd>" + venue.capacity + " people</dd></dl>"
                     );
                     $('#reserveButton').prop("disabled","");
                 });

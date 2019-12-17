@@ -39,12 +39,11 @@
     <h4>Booking Details</h4>
     <h5>There are currently <b>@Model.Bookings.Count</b> booking(s) for this event.</h5>
     <dl class="dl-horizontal">
-        @foreach (ThAmCo.Events.Data.GuestBooking entry in Model.Bookings)
+        @foreach (ThAmCo.Events.Models.GuestBookingDetailsViewModel entry in Model.Bookings)
         {
             CustomerDetailsViewModel detailView = new CustomerDetailsViewModel()
             {
                 FirstName = entry.Customer.FirstName,
-                Bookings = entry.Customer.Bookings,
                 Email = entry.Customer.Email,
                 Id = entry.Customer.Id,
                 Surname = entry.Customer.Surname,
@@ -78,6 +77,7 @@
                     }
                 }
             </dd>
+            <br />
         }
     </dl>
 </div>

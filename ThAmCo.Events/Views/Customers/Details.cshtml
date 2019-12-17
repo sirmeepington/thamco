@@ -35,7 +35,7 @@
     <h5>Customer is registered for <b>@Model.Bookings.Count()</b> booking(s).</h5>
     <hr />
     <dl class="dl-horizontal">
-        @foreach (ThAmCo.Events.Data.GuestBooking entry in Model.Bookings)
+        @foreach (ThAmCo.Events.Models.GuestBookingDetailsViewModel entry in Model.Bookings)
         {
             <dt>
                 @Html.DisplayNameFor(e => entry.Event.Title)

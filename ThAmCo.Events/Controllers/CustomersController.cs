@@ -37,6 +37,20 @@ namespace ThAmCo.Events.Controllers
                                 .Include(b => b.Customer)
                                 .Include(b => b.Event)
                                 .Where(i => i.CustomerId == customer.Id)
+                                .Select(x => new GuestBookingDetailsViewModel
+                                {
+                                    Attended = x.Attended,
+                                    CustomerId = x.CustomerId,
+                                    Event = new EventDetailsViewModel()
+                                    {
+                                        Id = x.Event.Id,
+                                        Duration = x.Event.Duration,
+                                        Title = x.Event.Title,
+                                        Date = x.Event.Date,
+                                        TypeId = x.Event.TypeId,
+                                    },
+                                    EventId = x.EventId
+                                })
                                 .ToListAsync()
             };
 
