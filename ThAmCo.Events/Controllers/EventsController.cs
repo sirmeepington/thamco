@@ -124,10 +124,10 @@ namespace ThAmCo.Events.Controllers
                     Duration = @event.Duration,
                     Id = @event.Id,
                     TypeId = @event.TypeId,
-                    Reservation = new Reservation()
+                    Reservation = new EventReservationViewModel()
                     {
                         Reference = reservation.Reference,
-                        StaffId = reservation.StaffId,
+                        //StaffId = reservation.StaffId,
                         WhenMade = reservation.WhenMade,
                         VenueCode = reservation.VenueCode,
                         EventDate = reservation.EventDate
@@ -209,11 +209,11 @@ namespace ThAmCo.Events.Controllers
                 return View(model);
             } else
             {
-                model.Reservation = new Reservation()
+                model.Reservation = new EventReservationViewModel()
                 {
                     EventDate = reservationGetDto.EventDate,
                     Reference = reservationGetDto.Reference,
-                    StaffId = reservationGetDto.StaffId,
+                    //StaffId = reservationGetDto.StaffId,
                     VenueCode = reservationGetDto.VenueCode,
                     WhenMade = reservationGetDto.WhenMade
                 };

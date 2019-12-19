@@ -24,7 +24,7 @@ namespace ThAmCo.Events.Models
 
         public Venue Venue { get; set; }
 
-        public Reservation Reservation { get; set; }
+        public EventReservationViewModel Reservation { get; set; }
 
         public List<Availability> Availabilities { get; set; }
 
