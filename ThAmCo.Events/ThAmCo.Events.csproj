@@ -9,6 +9,8 @@
     <Compile Remove="Data\Migrations\20191216150416_EventVenueCode.Designer.cs" />
     <Compile Remove="Data\Migrations\20191219143546_EventStaff.cs" />
     <Compile Remove="Data\Migrations\20191219143546_EventStaff.Designer.cs" />
+    <Compile Remove="Data\Migrations\20191219145453_EventStaff.cs" />
+    <Compile Remove="Data\Migrations\20191219145453_EventStaff.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,5 +1,4 @@
-
-using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 
 namespace ThAmCo.Events.Data
 {
@@ -12,6 +11,8 @@ namespace ThAmCo.Events.Data
         public string Name { get; set; }
 
         public bool FirstAider { get; set; }
+
+        public List<EventStaff> Events { get; set; }
 
     }
 }

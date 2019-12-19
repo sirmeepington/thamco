@@ -9,6 +9,7 @@ namespace ThAmCo.Events.Data
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<GuestBooking> Guests { get; set; }
+        public DbSet<ThAmCo.Events.Data.Staff> Staff { get; set; }
 
         private IHostingEnvironment HostEnv { get; }
 
@@ -46,6 +47,9 @@ namespace ThAmCo.Events.Data
                    .Property(e => e.TypeId)
                    .IsFixedLength();
 
+            builder.Entity<EventStaff>()
+                   .HasKey(s => new { s.StaffId, s.EventId });
+
             // seed data for debug / development testing
             if (HostEnv != null && HostEnv.IsDevelopment())
             {
@@ -68,7 +72,5 @@ namespace ThAmCo.Events.Data
                 );
             }
         }
-
-        public DbSet<ThAmCo.Events.Data.Staff> Staff { get; set; }
     }
 }

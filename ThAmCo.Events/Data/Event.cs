@@ -18,5 +18,7 @@ namespace ThAmCo.Events.Data
         public List<GuestBooking> Bookings { get; set; }
         
         public string VenueReservation { get; set; }
+
+        public IEnumerable<EventStaff> Staff { get; set; }
     }
 }
