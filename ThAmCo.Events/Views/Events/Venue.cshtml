@@ -30,7 +30,7 @@
         </dd>
     </dl>
     <h4>Reservation Details</h4>
-    @if (Model.Venue == null || Model.Reservation == null)
+    @if (Model.Reservation == null)
     {
         <p>No venue reservation found for current Event.</p>
         <hr/>
@@ -38,10 +38,11 @@
         @if (Model.Availabilities.Count > 0)
         {
             <p>Found <b>@Model.Availabilities.Count</b> availabilities:</p>
-            @Html.DropDownListFor(model => Model.SelectedVenue, Model.AvailabilitiesSelectList, "Please choose a venue.", new { id = "venueSelect", form = "menuForm", @class = "form-control" })
+            @Html.DropDownListFor(model => model.SelectedVenue, Model.AvailabilitiesSelectList, "Please choose a venue.", new { id = "venueSelect", form = "menuForm", @class = "form-control" })
             <br />
             <p id="venueInfo">Selected venue information will be shown here.</p>
-            <form asp-action="Venue">
+            <form id="menuForm" asp-action="Venue">
+                <input asp-for="Id" type="hidden" />
                 <input asp-for="Date" type="hidden" id="formDate" />
                 <input type="submit" id="reserveButton" disabled="disabled" class="btn btn-default" value="Reserve" />
             </form>

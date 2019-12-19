@@ -48,13 +48,12 @@ namespace ThAmCo.VenuesFacade
             if (!EnsureClient())
                 return null;
 
-            // ref = $"{availability.VenueCode}{availability.Date:yyyyMMdd}"
             ReservationGetDto reservation;
             try
             {
                 var query = HttpUtility.ParseQueryString(string.Empty);
                 query["reference"] = reference;
-                var response = await client.GetAsync("api/reservation?" + query.ToString());
+                var response = await client.GetAsync("api/reservations?" + query.ToString());
                 response.EnsureSuccessStatusCode();
                 string responseStr = await response.Content.ReadAsStringAsync();
                 reservation = await response.Content.ReadAsAsync<ReservationGetDto>();
@@ -83,7 +82,7 @@ namespace ThAmCo.VenuesFacade
             };
             ReservationGetDto reservation;
             try { 
-                var response = await client.PostAsJsonAsync("api/reservation", reservationDetails);
+                var response = await client.PostAsJsonAsync("api/reservations", reservationDetails);
                 response.EnsureSuccessStatusCode();
                 reservation = await response.Content.ReadAsAsync<ReservationGetDto>();
             } catch (HttpRequestException ex)
