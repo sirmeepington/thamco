@@ -13,6 +13,9 @@
     <thead>
         <tr>
             <th>
+                Info
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.Title)
             </th>
             <th>
@@ -30,6 +33,9 @@
     <tbody>
 @foreach (var item in Model) {
         <tr>
+            <td>
+                <span class="glyphicon glyphicon-thumbs-up text-success" title="Event OK"></span>
+            </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Title)
             </td>

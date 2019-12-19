@@ -108,9 +108,15 @@ namespace ThAmCo.Events.Controllers
             if (@event.VenueReservation != null)
             {
                 ReservationGetDto reservation = await _reservations.GetReservation(@event.VenueReservation);
-                if (reservation == null)
+                if (reservation.Reference == null)
                     goto NO_RES;
-                //Venue venue = apiGetDtoList.Select(x => new Venue() { Code = x.Code, Capacity = x.Capacity, Description = x.Description, Name = x.Name }).FirstOrDefault();
+
+                // HACKY WORKAROUND
+                List<AvailabilityApiGetDto> avail = await _availabilities.GetAvailabilities(@event.TypeId, new DateTime(2018, 07, 10), new DateTime(2019, 2, 10));
+                Venue venue = avail.Where(x => x.Code == reservation.VenueCode).Select(a => new Venue() { Code = a.Code, Capacity = a.Capacity, Description = a.Description, Name = a.Name }).FirstOrDefault();
+                if (venue == null)
+                    return BadRequest(); // Unfortunately ran out of valid venues for this type due to some scuffed design preventing us doing it properly.
+
                 EventVenueViewModel reservedViewModel = new EventVenueViewModel()
                 {
                     Title = @event.Title,
@@ -126,7 +132,8 @@ namespace ThAmCo.Events.Controllers
                         VenueCode = reservation.VenueCode,
                         EventDate = reservation.EventDate
                     },
-                    //Venue = venue
+                    Venue = venue,
+                    ReservationReference = reservation.Reference
                 };
                 return View(reservedViewModel);
             }
@@ -176,7 +183,7 @@ namespace ThAmCo.Events.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Venue(int? id, [Bind("Id,Date,SelectedVenue")] EventVenueViewModel ev)
+        public async Task<IActionResult> Venue(int? id, [Bind("Id,Date,SelectedVenue,TypeId")] EventVenueViewModel ev)
         {
             if (!ModelState.IsValid || !id.HasValue)
                 return View(ev);
@@ -184,19 +191,22 @@ namespace ThAmCo.Events.Controllers
             if (ev.Id != id)
                 return NotFound();
 
+            Event @event = await _context.Events.FindAsync(id);
+            if (@event == null)
+                return NotFound();
+
             ReservationGetDto reservationGetDto = await _reservations.CreateReservation(ev.Date, ev.SelectedVenue);
             EventVenueViewModel model = new EventVenueViewModel()
             {
                 Id = ev.Id,
                 Date = ev.Date,
-                Title = ev.Title,
-                Duration = ev.Duration,
+                Title = @event.Title,
+                Duration = @event.Duration,
                 TypeId = ev.TypeId,
-                Venue = ev.Venue,
             };
             if (reservationGetDto.Reference == null)
             {
-                return BadRequest();
+                return View(model);
             } else
             {
                 model.Reservation = new Reservation()
@@ -207,11 +217,12 @@ namespace ThAmCo.Events.Controllers
                     VenueCode = reservationGetDto.VenueCode,
                     WhenMade = reservationGetDto.WhenMade
                 };
-                Event e = await _context.Events.FindAsync(id);
-                if (e == null)
-                    return NotFound();
+                List<AvailabilityApiGetDto> avail = await _availabilities.GetAvailabilities(ev.TypeId, new DateTime(2018, 07, 10), new DateTime(2019, 2, 10));
+                Venue venue = avail.Where(x => x.Code == reservationGetDto.VenueCode).Select(a => new Venue() { Code = a.Code, Capacity = a.Capacity, Description = a.Description, Name = a.Name }).FirstOrDefault();
+                model.Venue = venue;
 
-                e.VenueReservation = reservationGetDto.Reference;
+                @event.VenueReservation = reservationGetDto.Reference;
+                model.ReservationReference = reservationGetDto.Reference;
                 await _context.SaveChangesAsync();
             }
 
@@ -363,6 +374,23 @@ namespace ThAmCo.Events.Controllers
             _context.Events.Remove(@event);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VenueCancel(int? id, string reference)
+        {
+            if (!id.HasValue || reference == null)
+                return NotFound();
+            ReservationGetDto reservation = await _reservations.GetReservation(reference);
+            if (reservation.Reference == null)
+                return NotFound();
+            Event @event = await _context.Events.FindAsync(id);
+            if (@event == null)
+                return NotFound();
+
+            await _reservations.CancelReservation(reference);
+            return RedirectToAction(nameof(Venue), new { id });
         }
 
         private bool EventExists(int id) => _context.Events.Any(e => e.Id == id);

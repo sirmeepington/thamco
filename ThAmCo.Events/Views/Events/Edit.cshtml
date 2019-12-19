@@ -31,7 +31,7 @@
 </div>
 
 <div>
-    <a asp-action="Venue" class="btn btn-warning"><span class="glyphicon glyphicon-pencil"></span> Edit Venue Information</a>
+    <a asp-action="Venue" asp-route-id="@Model.Id" class="btn btn-warning"><span class="glyphicon glyphicon-pencil"></span> Edit Venue</a>
     <a asp-action="Index" class="btn btn-default">Back to List</a>
 </div>
 

@@ -51,9 +51,7 @@ namespace ThAmCo.VenuesFacade
             ReservationGetDto reservation;
             try
             {
-                var query = HttpUtility.ParseQueryString(string.Empty);
-                query["reference"] = reference;
-                var response = await client.GetAsync("api/reservations?" + query.ToString());
+                var response = await client.GetAsync("api/reservations/" + reference);
                 response.EnsureSuccessStatusCode();
                 string responseStr = await response.Content.ReadAsStringAsync();
                 reservation = await response.Content.ReadAsAsync<ReservationGetDto>();
@@ -93,9 +91,21 @@ namespace ThAmCo.VenuesFacade
             return reservation;
         }
 
-        public Task<bool> CancelReservation(string reference)
+        public async Task<bool> CancelReservation(string reference)
         {
-            return Task.FromResult(true);
+            if (!EnsureClient())
+                return false;
+
+            try
+            {
+                var response = await client.DeleteAsync("api/reservations/" + reference);
+                response.EnsureSuccessStatusCode();
+                return true;
+            } catch (HttpRequestException ex)
+            {
+                _logger.LogError("Caught an error when cancelling a reservation. Exception: " + ex);
+                return false;
+            }
         }
     }
 }

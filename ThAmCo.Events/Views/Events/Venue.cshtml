@@ -44,6 +44,7 @@
             <form id="menuForm" asp-action="Venue">
                 <input asp-for="Id" type="hidden" />
                 <input asp-for="Date" type="hidden" id="formDate" />
+                <input asp-for="TypeId" type="hidden" />
                 <input type="submit" id="reserveButton" disabled="disabled" class="btn btn-default" value="Reserve" />
             </form>
 
@@ -56,51 +57,54 @@
     }
     else
     {
-        <h5>Venue:</h5>
+        <h4>Venue:</h4>
         <dl>
             <dt>
-                @Html.DisplayNameFor(model => model.Venue.Name);
+                @Html.DisplayNameFor(model => model.Venue.Name)
             </dt>
             <dd>
-                @Html.DisplayFor(model => model.Venue.Name);
+                @Html.DisplayFor(model => model.Venue.Name)
             </dd>
             <dt>
-                @Html.DisplayNameFor(model => model.Venue.Description);
+                @Html.DisplayNameFor(model => model.Venue.Description)
             </dt>
             <dd>
-                @Html.DisplayFor(model => model.Venue.Description);
+                @Html.DisplayFor(model => model.Venue.Description)
             </dd>
             <dt>
-                @Html.DisplayNameFor(model => model.Venue.Capacity);
+                @Html.DisplayNameFor(model => model.Venue.Capacity)
             </dt>
             <dd>
-                @Html.DisplayFor(model => model.Venue.Capacity);
+                @Html.DisplayFor(model => model.Venue.Capacity)
             </dd>
         </dl>
-        <h5>Reservation:</h5>
+        <h4>Reservation:</h4>
         <dl>
             <dt>
-                @Html.DisplayNameFor(model => model.Reservation.WhenMade);
+                @Html.DisplayNameFor(model => model.Reservation.WhenMade)
             </dt>
             <dd>
-                @Html.DisplayFor(model => model.Reservation.WhenMade);
+                @Html.DisplayFor(model => model.Reservation.WhenMade)
             </dd>
             <dt>
-                @Html.DisplayNameFor(model => model.Reservation.Reference);
+                @Html.DisplayNameFor(model => model.Reservation.Reference)
             </dt>
             <dd>
-                @Html.DisplayFor(model => model.Reservation.Reference);
+                @Html.DisplayFor(model => model.Reservation.Reference)
             </dd>
         </dl>
-
+        <form asp-action="VenueCancel" asp-route-id="@Model.Id">
+            <input asp-for="@Model.Id" type="hidden" />
+            <input asp-for="@Model.ReservationReference" name="reference" type="hidden"/>
+            <input type="submit" class="btn btn-danger" value="Cancel Reservation" />
+        </form>
     }
     <hr />
 </div>
 <div>
-    <a asp-action="Edit" class="btn btn-warning" asp-route-id="@Model.Id"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
+    <a asp-action="Edit" class="btn btn-warning" asp-route-id="@Model.Id"><span class="glyphicon glyphicon-pencil"></span> Edit Event</a>
     <a asp-action="Index" class="btn btn-default">Back to List</a>
 </div>
-
 @section Scripts {
     <script src="~/lib/jquery/dist/jquery.js"></script>
     <script>
@@ -109,7 +113,7 @@
             var datestr = $('#beginDate').text();
             var duration = $('#duration').text();
             duration = duration.replace(/[a-z]{1}/g, "").split(" ");
-            datestr = datestr.substring(0, 10).split("/"); // https://stackoverflow.com/questions/1144783/how-to-replace-all-occurrences-of-a-string
+            datestr = datestr.substring(0, 10).split("/");
             $('#formDate').val(datestr);
 
             $('#venueSelect').on('change', function () {
@@ -124,6 +128,7 @@
                 $('#venueInfo').text("Getting info...");
                 var startdate = new Date(datestr[2], datestr[1]-1, datestr[0]);
                 var enddate = new Date(datestr[2], datestr[1] - 1, datestr[0], duration[0], duration[1], duration[2]);
+                // AJAX call \/
                 $.get(("http://localhost:23652/api/availability?eventType=" + eventType + "&beginDate=" + startdate.toISOString() + "&endDate=" + enddate.toISOString()), function (res) {
                     var venue;
                     var venues = res;

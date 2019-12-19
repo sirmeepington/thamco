@@ -30,6 +30,10 @@ namespace ThAmCo.Events.Models
 
         public SelectList AvailabilitiesSelectList { get; set; }
 
+        [Display(Name = "Reservation #")]
+        public string ReservationReference { get; set; }
+
+        [Display(Name = "Selected Venue")]
         public string SelectedVenue { get; set; }
     }
 }
