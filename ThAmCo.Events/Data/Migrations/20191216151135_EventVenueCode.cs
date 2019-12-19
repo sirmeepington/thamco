@@ -57,7 +57,7 @@ namespace ThAmCo.Events.Data.Migrations
                 schema: "thamco.events",
                 columns: table => new
                 {
-                    StaffId = table.Column<string>(nullable: false),
+                    StaffId = table.Column<int>(nullable: false),
                     Email = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true)
                 },

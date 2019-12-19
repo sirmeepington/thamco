@@ -96,8 +96,9 @@ namespace ThAmCo.Events.Data.Migrations
 
             modelBuilder.Entity("ThAmCo.Events.Data.Staff", b =>
                 {
-                    b.Property<string>("StaffId")
-                        .ValueGeneratedOnAdd();
+                    b.Property<int>("StaffId")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Email");
 
