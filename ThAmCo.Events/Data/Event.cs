@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using ThAmCo.Venues.Data;
 
 namespace ThAmCo.Events.Data
 {

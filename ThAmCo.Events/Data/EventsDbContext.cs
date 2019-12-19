@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using ThAmCo.Events.Data;
 
 namespace ThAmCo.Events.Data
 {
