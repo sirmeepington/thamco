@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ThAmCo.Events.Data;
 
@@ -33,7 +30,7 @@ namespace ThAmCo.Events.Controllers
             }
 
             var staff = await _context.Staff
-                .FirstOrDefaultAsync(m => m.StaffId == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (staff == null)
             {
                 return NotFound();
@@ -53,7 +50,7 @@ namespace ThAmCo.Events.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("StaffId,Email,Name")] Staff staff)
+        public async Task<IActionResult> Create([Bind("Id,Email,Name")] Staff staff)
         {
             if (ModelState.IsValid)
             {
@@ -85,9 +82,9 @@ namespace ThAmCo.Events.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int? id, [Bind("StaffId,Email,Name")] Staff staff)
+        public async Task<IActionResult> Edit(int? id, [Bind("Id,Email,Name")] Staff staff)
         {
-            if (id != staff.StaffId)
+            if (id != staff.Id)
             {
                 return NotFound();
             }
@@ -101,14 +98,14 @@ namespace ThAmCo.Events.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!StaffExists(staff.StaffId))
+                    if (!StaffExists(staff.Id))
                     {
                         return NotFound();
                     }
                     else
                     {
                         throw;
-                    }
+                    } 
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -124,7 +121,7 @@ namespace ThAmCo.Events.Controllers
             }
 
             var staff = await _context.Staff
-                .FirstOrDefaultAsync(m => m.StaffId == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (staff == null)
             {
                 return NotFound();
@@ -146,7 +143,7 @@ namespace ThAmCo.Events.Controllers
 
         private bool StaffExists(int? id)
         {
-            return _context.Staff.Any(e => e.StaffId == id);
+            return _context.Staff.Any(e => e.Id == id);
         }
     }
 }

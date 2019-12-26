@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ThAmCo.Events.Data.Migrations
@@ -57,13 +58,14 @@ namespace ThAmCo.Events.Data.Migrations
                 schema: "thamco.events",
                 columns: table => new
                 {
-                    StaffId = table.Column<int>(nullable: false),
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Email = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Staff", x => x.StaffId);
+                    table.PrimaryKey("PK_Staff", x => x.Id);
                 });
 
             migrationBuilder.UpdateData(

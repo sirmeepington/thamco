@@ -4,7 +4,7 @@ namespace ThAmCo.Events.Data
 {
     public class Staff
     {
-        public int StaffId { get; set; }
+        public int Id { get; set; }
 
         public string Email { get; set; }
 

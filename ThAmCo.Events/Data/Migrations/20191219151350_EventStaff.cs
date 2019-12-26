@@ -37,7 +37,7 @@ namespace ThAmCo.Events.Data.Migrations
                         column: x => x.StaffId,
                         principalSchema: "thamco.events",
                         principalTable: "Staff",
-                        principalColumn: "StaffId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
         }
