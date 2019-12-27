@@ -9,21 +9,21 @@
 <div>
     <hr />
     <h4>Event Details</h4>
-    <dl>
+    <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.TypeId);
+            @Html.DisplayNameFor(model => model.TypeId):
         </dt>
         <dd>
             <span id="typeId">@Html.DisplayFor(model => model.TypeId)</span>
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.Date);
+            @Html.DisplayNameFor(model => model.Date):
         </dt>
         <dd>
             <span id="beginDate">@Html.DisplayFor(model => model.Date)</span>
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.Duration);
+            @Html.DisplayNameFor(model => model.Duration):
         </dt>
         <dd>
             <span id="duration">@Html.DisplayFor(model => model.Duration)</span>
@@ -58,21 +58,21 @@
     else
     {
         <h4>Venue:</h4>
-        <dl>
+        <dl class="dl-horizontal">
             <dt>
-                @Html.DisplayNameFor(model => model.Venue.Name)
+                @Html.DisplayNameFor(model => model.Venue.Name):
             </dt>
             <dd>
                 @Html.DisplayFor(model => model.Venue.Name)
             </dd>
             <dt>
-                @Html.DisplayNameFor(model => model.Venue.Description)
+                @Html.DisplayNameFor(model => model.Venue.Description):
             </dt>
             <dd>
                 @Html.DisplayFor(model => model.Venue.Description)
             </dd>
             <dt>
-                @Html.DisplayNameFor(model => model.Venue.Capacity)
+                @Html.DisplayNameFor(model => model.Venue.Capacity):
             </dt>
             <dd>
                 @Html.DisplayFor(model => model.Venue.Capacity) people
@@ -80,7 +80,7 @@
         </dl>
         <hr />
         <h4>Reservation:</h4>
-        <dl>
+        <dl class="dl-horizontal">
             <dt>
                 @Html.DisplayNameFor(model => model.Reservation.WhenMade)
             </dt>
@@ -145,7 +145,7 @@
                         return;
                     }
                     $('#venueInfo').html(
-                        "<dl><dt>Name:</dt><dd>" + venue.name + "</dd><dt>Description:</dt><dd>" + venue.description + "</dd><dt>Code per Hour:</dt><dd>£" + venue.costPerHour+ "</dd><dt>Capacity:</dt><dd>" + venue.capacity + " people</dd></dl>"
+                        "<dl class=\"dl-horizontal\"><dt>Name:</dt><dd>" + venue.name + "</dd><dt>Description:</dt><dd>" + venue.description + "</dd><dt>Cost per Hour:</dt><dd>£" + venue.costPerHour+ "</dd><dt>Capacity:</dt><dd>" + venue.capacity + " people</dd></dl>"
                     );
                     $('#reserveButton').prop("disabled","");
                 });

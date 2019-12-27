@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ThAmCo.Events.Data.Staff>
+﻿@model IEnumerable<ThAmCo.Events.Models.StaffIndexViewModel>
 
 @{
     ViewData["Title"] = "Index";
@@ -7,7 +7,7 @@
 <h2>Index</h2>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a class="btn btn-success" asp-action="Create"><span class="glyphicon glyphicon-plus"></span> Create New</a>
 </p>
 <table class="table">
     <thead>
@@ -36,7 +36,7 @@
             <td>
                 @if (item.FirstAider)
                 {
-                    <span class="glyphicon glyphicon-check text-success"></span>
+                    <span class="glyphicon glyphicon-ok text-success"></span>
                 }
                 else
                 {
@@ -44,9 +44,10 @@
                 }
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a class="btn btn-warning" asp-action="Edit" asp-route-id="@item.Id"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
+                <a class="btn btn-default" asp-action="Details" asp-route-id="@item.Id"><span class="glyphicon glyphicon-search"></span> Details</a>
+                <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id"><span class="glyphicon glyphicon-remove"></span> Delete</a>
+                <a class="btn btn-default" asp-action="Events" asp-route-id="@item.Id"><span class="glyphicon glyphicon-picture"></span> Events</a>
             </td>
         </tr>
 }

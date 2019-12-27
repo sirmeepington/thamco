@@ -1,0 +1,79 @@
+﻿@model ThAmCo.Events.Models.Staff.StaffEventViewModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h2>Event Details</h2>
+
+<div>
+    <h4>Staff</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.FirstAider)
+        </dt>
+        <dd>
+            @if (Model.FirstAider)
+            {
+                <span class="glyphicon glyphicon-check text-success"></span>
+            } else
+            {
+                <span class="glyphicon glyphicon-remove text-danger"></span>
+            }
+        </dd>
+    </dl>
+    <hr />
+    <h4>Events:</h4>
+    @if (Model.Events == null || Model.Events.Count == 0)
+    {
+        <p>@Html.DisplayFor(model => model.Name) is not booked into any events.</p>
+    }
+    else
+    {
+        <p>Events booked for @Html.DisplayFor(model => model.Name)</p>
+        @foreach (var e in Model.Events)
+        {
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(model => e.Title)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => e.Title)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => e.Date)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => e.Date)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => e.Duration)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => e.Duration)
+            </dd>
+            <dt>Actions</dt>
+            <dd>
+                <a class="btn btn-danger" asp-action="RemoveEvent" asp-route-id="@Model.Id"
+                   asp-route-eventId="@e.Id">
+                    <span class="glyphicon glyphicon-remove"></span> Leave Event
+                </a>
+                <a class="btn btn-default" asp-controller="Events" asp-action="Details" asp-route-id="@e.Id">
+                    <span class="glyphicon glyphicon-search"></span> View Event
+                </a>
+            </dd>
+        </dl>
+        }
+    }
+</div>
+<div>
+    <a class="btn btn-warning" asp-action="Edit" asp-route-id="@Model.Id"><span class="glyphicon glyphicon-pencil"></span> Edit</a> 
+    <a class="btn btn-default" asp-action="Index">Back to List</a>
+</div>
