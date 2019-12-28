@@ -70,28 +70,32 @@ namespace ThAmCo.Events.Controllers
                 Date = @event.Date,
                 Duration = @event.Duration,
                 TypeId = (await _eventTypes.GetEventType(@event.TypeId)).Title,
-                Bookings = await _context.Guests.Include(e => e.Customer).Include(e => e.Event).Where(e => e.EventId == id).Select(x => new GuestBookingDetailsViewModel()
-                {
-                    Attended = x.Attended,
-                    Customer = new CustomerDetailsViewModel()
+                Bookings = await _context.Guests
+                    .Include(e => e.Customer)
+                    .Include(e => e.Event)
+                    .Where(e => e.EventId == id)
+                    .Select(x => new GuestBookingDetailsViewModel()
                     {
-                        Email = x.Customer.Email,
-                        FirstName = x.Customer.FirstName,
-                        FullName = x.Customer.FullName,
-                        Id = x.Customer.Id,
-                        Surname = x.Customer.Surname
-                    },
-                    Event = new EventDetailsViewModel()
-                    {
-                        Id = x.Event.Id,
-                        Date = x.Event.Date,
-                        Duration = x.Event.Duration,
-                        Title = x.Event.Title,
-                        TypeId = x.Event.TypeId
-                    },
-                    CustomerId = x.CustomerId,
-                    EventId = x.EventId
-                }).ToListAsync(),
+                        Attended = x.Attended,
+                        Customer = new CustomerDetailsViewModel()
+                        {
+                            Email = x.Customer.Email,
+                            FirstName = x.Customer.FirstName,
+                            FullName = x.Customer.FullName,
+                            Id = x.Customer.Id,
+                            Surname = x.Customer.Surname
+                        },
+                        Event = new EventDetailsViewModel()
+                        {
+                            Id = x.Event.Id,
+                            Date = x.Event.Date,
+                            Duration = x.Event.Duration,
+                            Title = x.Event.Title,
+                            TypeId = x.Event.TypeId
+                        },
+                        CustomerId = x.CustomerId,
+                        EventId = x.EventId
+                    }).ToListAsync(),
             };
             
             return View(viewModel);
@@ -116,8 +120,17 @@ namespace ThAmCo.Events.Controllers
                     goto NO_RES;
 
                 // HACKY WORKAROUND
-                List<AvailabilityApiGetDto> avail = await _availabilities.GetAvailabilities(@event.TypeId, new DateTime(2018, 07, 10), new DateTime(2019, 2, 10));
-                Venue venue = avail.Where(x => x.Code == reservation.VenueCode).Select(a => new Venue() { Code = a.Code, Capacity = a.Capacity, Description = a.Description, Name = a.Name }).FirstOrDefault();
+                List<AvailabilityApiGetDto> avail = await _availabilities
+                    .GetAvailabilities(@event.TypeId, new DateTime(2018, 07, 10), new DateTime(2019, 2, 10));
+                Venue venue = avail
+                    .Where(x => x.Code == reservation.VenueCode)
+                    .Select(a => new Venue() {
+                        Code = a.Code,
+                        Capacity = a.Capacity,
+                        Description = a.Description,
+                        Name = a.Name 
+                    }).FirstOrDefault();
+
                 if (venue == null)
                     return BadRequest(); // Unfortunately ran out of valid venues for this type due to some scuffed design preventing us doing it properly.
 
@@ -143,7 +156,8 @@ namespace ThAmCo.Events.Controllers
             }
 
             NO_RES:
-            List<AvailabilityApiGetDto> apiGetDtoList = await _availabilities.GetAvailabilities(@event.TypeId, @event.Date, @event.Date.Add(@event.Duration.Value));
+            List<AvailabilityApiGetDto> apiGetDtoList = await _availabilities
+                .GetAvailabilities(@event.TypeId, @event.Date, @event.Date.Add(@event.Duration.Value));
             List<Availability> availabilities = apiGetDtoList
                 .Select(x => new Availability
                 {
@@ -165,13 +179,17 @@ namespace ThAmCo.Events.Controllers
             {
                 ReservationGetDto reservations = await _reservations.GetReservation(availability.VenueCode, @event.Date);
                 if (reservations.Reference == null)
-                {
                     nonReserved.Add(availability);
-                }
             }
             availabilities.Clear();
 
-            SelectList list = new SelectList(nonReserved.Select(x => new { x.Venue.Name, x.VenueCode, x.Date, x.CostPerHour }), "VenueCode", "Name");
+            SelectList list = new SelectList(
+                nonReserved.Select(x => new {
+                    x.Venue.Name,
+                    x.VenueCode,
+                    x.Date,
+                    x.CostPerHour}
+                ),"VenueCode","Name");
             EventVenueViewModel novenue = new EventVenueViewModel()
             {
                 Title = @event.Title,
@@ -221,8 +239,17 @@ namespace ThAmCo.Events.Controllers
                     VenueCode = reservationGetDto.VenueCode,
                     WhenMade = reservationGetDto.WhenMade
                 };
-                List<AvailabilityApiGetDto> avail = await _availabilities.GetAvailabilities(ev.TypeId, new DateTime(2018, 07, 10), new DateTime(2019, 2, 10));
-                Venue venue = avail.Where(x => x.Code == reservationGetDto.VenueCode).Select(a => new Venue() { Code = a.Code, Capacity = a.Capacity, Description = a.Description, Name = a.Name }).FirstOrDefault();
+
+                List<AvailabilityApiGetDto> avail = await _availabilities
+                    .GetAvailabilities(ev.TypeId, new DateTime(2018, 07, 10), new DateTime(2019, 2, 10));
+                Venue venue = avail
+                    .Where(x => x.Code == reservationGetDto.VenueCode)
+                    .Select(a => new Venue() {
+                        Code = a.Code,
+                        Capacity = a.Capacity,
+                        Description = a.Description,
+                        Name = a.Name })
+                    .FirstOrDefault();
                 model.Venue = venue;
 
                 @event.VenueReservation = reservationGetDto.Reference;
@@ -237,8 +264,6 @@ namespace ThAmCo.Events.Controllers
         public IActionResult Create() => View();
 
         // POST: Events/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Title,Date,Duration,TypeId")] EventCreateViewModel @event)
@@ -270,7 +295,8 @@ namespace ThAmCo.Events.Controllers
             if (@event == null || @event.Cancelled)
                 return NotFound();
 
-            List<AvailabilityApiGetDto> apiGetDtos = await _availabilities.GetAvailabilities(@event.TypeId, @event.Date, @event.Date.Add(@event.Duration.Value));
+            List<AvailabilityApiGetDto> apiGetDtos = await _availabilities
+                .GetAvailabilities(@event.TypeId, @event.Date, @event.Date.Add(@event.Duration.Value));
             List<Availability> availabilities = new List<Availability>();
             foreach(AvailabilityApiGetDto avail in apiGetDtos)
             {
@@ -302,8 +328,6 @@ namespace ThAmCo.Events.Controllers
         }
 
         // POST: Events/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Duration,VenueToReserve")] EventEditViewModel @event)
@@ -316,7 +340,8 @@ namespace ThAmCo.Events.Controllers
                 try
                 {
 
-                    Event e = await _context.Events.FirstOrDefaultAsync(dbEvent => dbEvent.Id == @event.Id);
+                    Event e = await _context.Events
+                        .FirstOrDefaultAsync(dbEvent => dbEvent.Id == @event.Id);
                     if (e == null)
                         return BadRequest();
 
@@ -361,7 +386,8 @@ namespace ThAmCo.Events.Controllers
             if (id == null)
                 return NotFound();
 
-            Event @event = await _context.Events.Where(c => !c.Cancelled)
+            Event @event = await _context.Events
+                .Where(c => !c.Cancelled)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (@event == null)
                 return NotFound();
@@ -377,8 +403,10 @@ namespace ThAmCo.Events.Controllers
             Event @event = await _context.Events.FindAsync(id);
             if (@event.Cancelled)
                 return NotFound();
-            var staff = await _context.EventStaff.Where(x => x.EventId == id).ToListAsync();
+            var staff = await _context.EventStaff
+                .Where(x => x.EventId == id).ToListAsync();
             _context.EventStaff.RemoveRange(staff);
+
             if (!string.IsNullOrEmpty(@event.VenueReservation))
                 await _reservations.CancelReservation(@event.VenueReservation);
             @event.Cancelled = true;
@@ -393,9 +421,11 @@ namespace ThAmCo.Events.Controllers
         {
             if (!id.HasValue || reference == null)
                 return NotFound();
+
             ReservationGetDto reservation = await _reservations.GetReservation(reference);
             if (reservation.Reference == null)
                 return NotFound();
+
             Event @event = await _context.Events.FindAsync(id);
             if (@event == null || @event.Cancelled)
                 return NotFound();
@@ -420,11 +450,10 @@ namespace ThAmCo.Events.Controllers
                 .Include(x => x.Staff)
                 .ToListAsync();
 
-            // If not in EventStaff
-
             List<Staff> available = new List<Staff>();
             var occupiedIds = eventStaff.Select(x => x.StaffId).ToList();
 
+            // If not in EventStaff
             foreach (Staff f in staff)
             {
                 if (!occupiedIds.Contains(f.Id))
@@ -447,6 +476,7 @@ namespace ThAmCo.Events.Controllers
                         Id = x.Id,
                         Email = x.Email,
                         FirstAider = x.FirstAider,
+                        // Formatting for SelectList
                         Name = $"{(x.FirstAider ? "[First Aider]": "")} {x.Name} ({x.Email})"
                     }).ToList(),
                 AssignedStaff = eventStaff
@@ -464,18 +494,24 @@ namespace ThAmCo.Events.Controllers
 
         private async Task<EventWarningType> GetWarningTypeFromEvent(Event e)
         {
-            var staff = await _context.EventStaff.Include(x => x.Staff).Include(x => x.Event).Where(x => x.EventId == e.Id && !x.Event.Cancelled).Select(x => x.Staff).ToListAsync();
+            var staff = await _context.EventStaff
+                .Include(x => x.Staff)
+                .Include(x => x.Event)
+                .Where(x => x.EventId == e.Id && !x.Event.Cancelled)
+                .Select(x => x.Staff)
+                .ToListAsync();
+
             EventWarningType type = EventWarningType.None;
             if (!staff.Any(x => x.FirstAider))
-            {
                 type = EventWarningType.NoFirstAider;
-            }
-            var bookings = await _context.Guests.Where(x => x.EventId == e.Id).ToListAsync();
+
+            var bookings = await _context.Guests
+                .Where(x => x.EventId == e.Id)
+                .ToListAsync();
             int count = bookings.Count / 10;
+
             if (staff.Count <= count)
-            {
                 type |= EventWarningType.InsufficientStaff;
-            }
 
             return type;
         }

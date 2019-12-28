@@ -20,7 +20,12 @@ namespace ThAmCo.Events.Controllers
         public async Task<IActionResult> Index()
         {
             var staff = await _context.Staff.ToListAsync();
-            var indexModel = staff.Select(x => new StaffIndexViewModel() { Email = x.Email, FirstAider = x.FirstAider, Id = x.Id, Name = x.Name }).ToList();
+            var indexModel = staff.Select(x => new StaffIndexViewModel() {
+                Email = x.Email,
+                FirstAider = x.FirstAider, 
+                Id = x.Id,
+                Name = x.Name 
+            }).ToList();
 
             return View(indexModel);
         }
@@ -46,7 +51,12 @@ namespace ThAmCo.Events.Controllers
             {
                 Id = id.Value,
                 Name = staff.Name,
-                Events = events.Select(x => new EventDetailsViewModel() { Id = x.Event.Id, Duration = x.Event.Duration, Date = x.Event.Date, Title = x.Event.Title }).ToList(),
+                Events = events.Select(x => new EventDetailsViewModel() {
+                    Id = x.Event.Id,
+                    Duration = x.Event.Duration,
+                    Date = x.Event.Date,
+                    Title = x.Event.Title 
+                }).ToList(),
                 FirstAider = staff.FirstAider,
                 Email = staff.Email
             };

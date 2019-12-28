@@ -125,7 +125,8 @@ namespace ThAmCo.Events.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveConfirmed(int id, int customerId)
         {
-            var guestBooking = await _context.Guests.FirstOrDefaultAsync(x => x.CustomerId == customerId && x.EventId == id);
+            var guestBooking = await _context.Guests
+                .FirstOrDefaultAsync(x => x.CustomerId == customerId && x.EventId == id);
             if (guestBooking == null)
                 return BadRequest();
 

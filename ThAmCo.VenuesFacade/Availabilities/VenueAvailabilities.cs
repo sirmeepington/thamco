@@ -49,10 +49,12 @@ namespace ThAmCo.VenuesFacade
                 query["eventType"] = eventType;
                 query["beginDate"] = $"{from:yyyy-MM-dd}";
                 query["endDate"] = $"{to:yyyy-MM-dd}";
+
                 var response = await _client.GetAsync("api/availability?"+query.ToString());
                 response.EnsureSuccessStatusCode();
                 string responseStr = await response.Content.ReadAsStringAsync();
-                List<AvailabilityApiGetDto> venues = await response.Content.ReadAsAsync<List<AvailabilityApiGetDto>>();
+                List<AvailabilityApiGetDto> venues = await response.Content
+                    .ReadAsAsync<List<AvailabilityApiGetDto>>();
                 venue = venues;
             } catch (HttpRequestException ex)
             {

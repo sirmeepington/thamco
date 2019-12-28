@@ -22,7 +22,8 @@ namespace ThAmCo.Events.Controllers
             if (id == null)
                 return NotFound();
 
-            Customer customer = await _context.Customers.Where(c => !c.Deleted)
+            Customer customer = await _context.Customers
+                .Where(c => !c.Deleted)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (customer == null)
                 return NotFound();
@@ -118,7 +119,8 @@ namespace ThAmCo.Events.Controllers
             {
                 try
                 {
-                    Customer currentCustomer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == customer.Id && !c.Deleted);
+                    Customer currentCustomer = await _context.Customers
+                        .FirstOrDefaultAsync(c => c.Id == customer.Id && !c.Deleted);
                     if (currentCustomer == null)
                         return BadRequest();
 
