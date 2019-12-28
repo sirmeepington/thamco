@@ -379,6 +379,8 @@ namespace ThAmCo.Events.Controllers
                 return NotFound();
             var staff = await _context.EventStaff.Where(x => x.EventId == id).ToListAsync();
             _context.EventStaff.RemoveRange(staff);
+            if (!string.IsNullOrEmpty(@event.VenueReservation))
+                await _reservations.CancelReservation(@event.VenueReservation);
             @event.Cancelled = true;
             _context.Events.Update(@event);
             await _context.SaveChangesAsync();
