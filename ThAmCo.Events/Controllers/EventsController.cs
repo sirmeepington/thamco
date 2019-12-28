@@ -361,7 +361,7 @@ namespace ThAmCo.Events.Controllers
             if (id == null)
                 return NotFound();
 
-            Event @event = await _context.Events
+            Event @event = await _context.Events.Where(c => !c.Cancelled)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (@event == null)
                 return NotFound();
@@ -375,6 +375,8 @@ namespace ThAmCo.Events.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             Event @event = await _context.Events.FindAsync(id);
+            if (@event.Cancelled)
+                return NotFound();
             var staff = await _context.EventStaff.Where(x => x.EventId == id).ToListAsync();
             _context.EventStaff.RemoveRange(staff);
             @event.Cancelled = true;
@@ -500,7 +502,7 @@ namespace ThAmCo.Events.Controllers
 
         }
 
-        private bool EventExists(int id) => _context.Events.Any(e => e.Id == id);
+        private bool EventExists(int id) => _context.Events.Where(c => !c.Cancelled).Any(e => e.Id == id);
 
         public async Task<IActionResult> RemoveStaff(int? id, int StaffId)
         {

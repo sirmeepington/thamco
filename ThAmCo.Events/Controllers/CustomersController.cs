@@ -14,7 +14,7 @@ namespace ThAmCo.Events.Controllers
         public CustomersController(EventsDbContext context) => _context = context;
 
         // GET: Customers
-        public async Task<IActionResult> Index() => View(await _context.Customers.ToListAsync());
+        public async Task<IActionResult> Index() => View(await _context.Customers.Where(c => !c.Deleted).ToListAsync());
 
         // GET: Customers/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -22,7 +22,7 @@ namespace ThAmCo.Events.Controllers
             if (id == null)
                 return NotFound();
 
-            Customer customer = await _context.Customers
+            Customer customer = await _context.Customers.Where(c => !c.Deleted)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (customer == null)
                 return NotFound();
@@ -90,7 +90,7 @@ namespace ThAmCo.Events.Controllers
                 return NotFound();
 
             Customer customer = await _context.Customers.FindAsync(id);
-            if (customer == null)
+            if (customer == null || customer.Deleted)
                 return NotFound();
 
             CustomerEditViewModel model = new CustomerEditViewModel()
@@ -118,7 +118,7 @@ namespace ThAmCo.Events.Controllers
             {
                 try
                 {
-                    Customer currentCustomer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == customer.Id);
+                    Customer currentCustomer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == customer.Id && !c.Deleted);
                     if (currentCustomer == null)
                         return BadRequest();
 
@@ -147,7 +147,7 @@ namespace ThAmCo.Events.Controllers
             if (id == null)
                 return NotFound();
 
-            Customer customer = await _context.Customers
+            Customer customer = await _context.Customers.Where(c => !c.Deleted)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (customer == null)
@@ -162,14 +162,16 @@ namespace ThAmCo.Events.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             Customer customer = await _context.Customers.FindAsync(id);
+            if (customer.Deleted)
+                return NotFound();
             customer.FirstName = "REDACTED";
             customer.Surname = "REDACTED";
             customer.Email = "REDACTED";
-            _context.Customers.Update(customer);
+            customer.Deleted = true;
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CustomerExists(int id) => _context.Customers.Any(e => e.Id == id);
+        private bool CustomerExists(int id) => _context.Customers.Where(c => !c.Deleted).Any(e => e.Id == id);
     }
 }

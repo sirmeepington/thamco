@@ -63,7 +63,14 @@
                 <a class="btn btn-default" asp-action="Details" asp-route-id="@item.Id"><span class="glyphicon glyphicon-search"></span> Details</a>
                 <a class="btn btn-default" asp-action="Venue" asp-route-id="@item.Id"><span class="glyphicon glyphicon-picture"></span> Venue</a>
                 <a class="btn btn-default" asp-action="Staff" asp-route-id="@item.Id"><span class="glyphicon glyphicon-user"></span> Staff</a>
-                 <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id"><span class="glyphicon glyphicon-remove"></span> Delete</a>
+                @if (DateTime.UtcNow > item.Date.Add(item.Duration.Value))
+                {
+                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id"><span class="glyphicon glyphicon-remove"></span> Delete</a>
+                }
+                else
+                {
+                <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id"><span class="glyphicon glyphicon-remove"></span> Cancel</a>
+                }
             </td>
         </tr>
 }
