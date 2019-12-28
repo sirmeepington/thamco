@@ -1,0 +1,102 @@
+﻿@model ThAmCo.Events.Models.EventStaffViewModel
+
+@{
+    ViewData["Title"] = "Staff";
+}
+
+<h2>Staff</h2>
+
+<div>
+    <h4>Event</h4>
+    <hr />
+    @if (Model.WarningType != EventWarningType.None)
+    {
+        <div class="alert alert-warning" role="alert">
+            @{
+                List<string> warnings = EventWarningUtil.GetWarnings(Model.WarningType);
+                <p>Warnings: </p>
+                <ul>
+                @foreach (string warns in warnings)
+                {
+                    <li>@warns</li>
+                }
+                </ul>
+            }
+        </div>
+    }
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Event.Title)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Event.Title)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Event.Date)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Event.Date)
+        </dd>
+    </dl>
+    <hr />
+    <h4>Staff</h4>
+    <hr />
+
+    @foreach (ThAmCo.Events.Models.StaffIndexViewModel staff in Model.AssignedStaff)
+    {
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(x => staff.Name)
+            </dt>
+            <dd>
+                @Html.DisplayFor(x => staff.Name)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(x => staff.FirstAider)
+            </dt>
+            <dd>
+                @if (staff.FirstAider)
+                {
+                    <span class="glyphicon glyphicon-ok text-success"></span>
+                }
+                else
+                {
+                    <span class="glyphicon glyphicon-remove text-danger"></span>
+                }
+            </dd>
+            <dt>Actions</dt>
+            <dd>
+                <a class="btn btn-danger" asp-action="RemoveStaff" asp-route-id="@Model.Id" asp-route-staffId="@staff.Id">Remove Staff</a>
+                <a class="btn btn-default" asp-controller="Staffs" asp-action="Details" asp-route-id="@staff.Id">View Staff</a>
+            </dd>
+        </dl>
+    }
+    @if (Model.AvailableStaff.Count > 0)
+    {
+        <p>Add available Staff member:</p>
+        <form asp-action="AddStaff" id="staffForm">
+            @{
+                var selectList = new SelectList(Model.AvailableStaff, "Id", "Name");
+            }
+            <input type="hidden" value="@Model.Id" name="Id" />
+            <select name="StaffId" id="staffList" class="form-control" asp-items="@selectList" onchange="Submit();">
+                <option disabled="disabled" selected="selected">Choose a Staff member</option>
+            </select>
+        </form>
+    }
+</div>
+<br/>
+<div>
+    <a class="btn btn-warning" asp-action="Edit" asp-route-id="@Model.Id"><span class="glyphicon glyphicon-pencil"></span> Edit Event</a>
+    <a class="btn btn-default" asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script>
+        function Submit() {
+            var form = $("#staffForm");
+            form.submit();
+        };
+    </script>
+}

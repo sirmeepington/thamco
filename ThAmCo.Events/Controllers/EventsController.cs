@@ -393,6 +393,104 @@ namespace ThAmCo.Events.Controllers
             return RedirectToAction(nameof(Venue), new { id });
         }
 
+        public async Task<IActionResult> Staff(int? id)
+        {
+            if (!id.HasValue)
+                return NotFound();
+
+            var ev = await _context.Events.FindAsync(id);
+            if (ev == null || ev.Id != id)
+                return NotFound();
+
+            var staff = await _context.Staff.ToListAsync();
+
+            var eventStaff = await _context.EventStaff
+                .Where(x => x.EventId == id)
+                .Include(x => x.Staff)
+                .ToListAsync();
+
+            // If not in EventStaff
+
+            List<Staff> available = new List<Staff>();
+            var occupiedIds = eventStaff.Select(x => x.StaffId).ToList();
+
+            foreach (Staff f in staff)
+            {
+                if (!occupiedIds.Contains(f.Id))
+                    available.Add(f);
+            }
+
+            EventStaffViewModel vm = new EventStaffViewModel()
+            {
+                Id = ev.Id,
+                Event = new EventDetailsViewModel() { Id = ev.Id, Date = ev.Date, Title = ev.Title, TypeId = ev.TypeId, Duration = ev.Duration },
+                AvailableStaff = available,
+                AssignedStaff = eventStaff.Select(x => new StaffIndexViewModel { Id = x.Staff.Id, Email = x.Staff.Email, Name = x.Staff.Name, FirstAider = x.Staff.FirstAider }).ToList(),
+                WarningType = await GetWarningTypeFromEvent(ev)
+            };
+
+            return View(vm);
+        }
+
+        private async Task<EventWarningType> GetWarningTypeFromEvent(Event e)
+        {
+            var staffId = await _context.EventStaff.Where(x => x.EventId == e.Id).Select(x => x.StaffId).ToListAsync();
+            var staff = await _context.Staff.Where(x => staffId.Contains(x.Id)).ToListAsync();
+
+            EventWarningType type = EventWarningType.None;
+            if (!staff.Any(x => x.FirstAider))
+            {
+                type = EventWarningType.NoFirstAider;
+            }
+            var bookings = await _context.Guests.Where(x => x.EventId == e.Id).ToListAsync();
+            
+            if (staff.Count < (bookings.Count / 10))
+            {
+                type |= EventWarningType.InsufficientStaff;
+            }
+
+            return type;
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddStaff(int? Id, int StaffId)
+        {
+            if (!Id.HasValue)
+                return NotFound();
+
+            var existCheck = await _context.EventStaff.FindAsync(StaffId, Id);
+            if (existCheck != null)
+                return BadRequest();
+
+            EventStaff staff = new EventStaff()
+            {
+                EventId = Id.Value,
+                StaffId = StaffId
+            };
+
+            await _context.EventStaff.AddAsync(staff);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Staff), new { id = Id.Value });
+
+        }
+
         private bool EventExists(int id) => _context.Events.Any(e => e.Id == id);
+
+        public async Task<IActionResult> RemoveStaff(int? id, int StaffId)
+        {
+            if (!id.HasValue)
+                return NotFound();
+
+            var ev = await _context.EventStaff.FindAsync(StaffId, id);
+            if (ev == null)
+                return RedirectToAction(nameof(Staff), new { id });
+
+            _context.Remove(ev);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Staff), new { id });
+        }
     }
 }

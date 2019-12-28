@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ThAmCo.Events.Data;
 using ThAmCo.Events.Models;
-using ThAmCo.Events.Models.Staff;
 
 namespace ThAmCo.Events.Controllers
 {
@@ -41,7 +40,19 @@ namespace ThAmCo.Events.Controllers
                 return NotFound();
             }
 
-            return View(staff);
+            var events = await _context.EventStaff.Include(x => x.Event).Where(x => x.StaffId == staff.Id).ToListAsync();
+
+            StaffDetailsViewModel staffEventViewModel = new StaffDetailsViewModel()
+            {
+                Id = id.Value,
+                Name = staff.Name,
+                Events = events.Select(x => new EventDetailsViewModel() { Id = x.Event.Id, Duration = x.Event.Duration, Date = x.Event.Date, Title = x.Event.Title }).ToList(),
+                FirstAider = staff.FirstAider,
+                Email = staff.Email
+            };
+
+
+            return View(staffEventViewModel);
         }
 
         // GET: Staffs/Create
@@ -151,36 +162,19 @@ namespace ThAmCo.Events.Controllers
             return _context.Staff.Any(e => e.Id == id);
         }
 
-        public async Task<IActionResult> Events(int? id)
-        {
-            if (!id.HasValue) return NotFound();
-
-            var staff = await _context.Staff.FindAsync(id);
-            var events = await _context.EventStaff.Include(x => x.Event).Where(x => x.StaffId == staff.Id).ToListAsync();
-
-            StaffEventViewModel staffEventViewModel = new StaffEventViewModel()
-            {
-                Id = id.Value,
-                Name = staff.Name,
-                Events = events.Select(x => new EventDetailsViewModel() {Id = x.Event.Id, Duration = x.Event.Duration, Date = x.Event.Date, Title = x.Event.Title }).ToList()
-            };
-
-            return View(staffEventViewModel);
-        }
-
-        public async Task<IActionResult> RemoveEvent(int? id, int eventId)
+        public async Task<IActionResult> RemoveFromEvent(int? id, int eventId)
         {
             if (!id.HasValue)
                 return NotFound();
 
             var ev = await _context.EventStaff.FindAsync(id, eventId);
             if (ev == null)
-                return RedirectToAction(nameof(Events), new { id });
+                return RedirectToAction(nameof(Details), new { id });
 
             _context.Remove(ev);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Events), new { id });
+            return RedirectToAction(nameof(Details), new { id });
         }
     }
 }
