@@ -23,5 +23,7 @@ namespace ThAmCo.Events.Models
 
         public List<GuestBookingDetailsViewModel> Bookings { get; set; }
 
+        public EventWarningType Warnings { get; set; }
+
     }
 }

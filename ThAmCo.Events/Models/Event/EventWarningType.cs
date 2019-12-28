@@ -14,12 +14,12 @@ namespace ThAmCo.Events.Models
     {
         public static bool ContainsWarning(EventWarningType type, EventWarningType secondType)
         {
-            return (type & secondType) == type;
+            return (type & secondType) == secondType;
         }
 
         private static readonly Dictionary<EventWarningType,string> Types = new Dictionary<EventWarningType, string>()
         {
-            { EventWarningType.None, "" },
+            { EventWarningType.None, string.Empty },
             { EventWarningType.NoFirstAider, "No First Aider Specified"},
             { EventWarningType.InsufficientStaff, "Not Enough Staff have been Assigned" }
         };

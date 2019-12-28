@@ -1,11 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 using ThAmCo.Venues.Models;
 
 namespace ThAmCo.VenuesFacade
@@ -14,7 +11,7 @@ namespace ThAmCo.VenuesFacade
     {
         private ILogger<VenueReservation> _logger;
         private IConfiguration _config;
-        private HttpClient client = null;
+        private HttpClient _client = null;
 
         public VenueReservation(ILogger<VenueReservation> logger, IConfiguration config)
         {
@@ -24,17 +21,15 @@ namespace ThAmCo.VenuesFacade
 
         private bool EnsureClient()
         {
-            if (client != null)
+            if (_client != null)
                 return true;
 
-            client = new HttpClient()
+            _client = new HttpClient()
             {
-#if DEBUG
                 BaseAddress = new Uri(_config["VenuesBaseUrl"]),
-#endif
                 Timeout = TimeSpan.FromSeconds(5)
             };
-            client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+            _client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
             return true;
         }
 
@@ -51,7 +46,7 @@ namespace ThAmCo.VenuesFacade
             ReservationGetDto reservation;
             try
             {
-                var response = await client.GetAsync("api/reservations/" + reference);
+                var response = await _client.GetAsync("api/reservations/" + reference);
                 response.EnsureSuccessStatusCode();
                 string responseStr = await response.Content.ReadAsStringAsync();
                 reservation = await response.Content.ReadAsAsync<ReservationGetDto>();
@@ -80,7 +75,7 @@ namespace ThAmCo.VenuesFacade
             };
             ReservationGetDto reservation;
             try { 
-                var response = await client.PostAsJsonAsync("api/reservations", reservationDetails);
+                var response = await _client.PostAsJsonAsync("api/reservations", reservationDetails);
                 response.EnsureSuccessStatusCode();
                 reservation = await response.Content.ReadAsAsync<ReservationGetDto>();
             } catch (HttpRequestException ex)
@@ -98,7 +93,7 @@ namespace ThAmCo.VenuesFacade
 
             try
             {
-                var response = await client.DeleteAsync("api/reservations/" + reference);
+                var response = await _client.DeleteAsync("api/reservations/" + reference);
                 response.EnsureSuccessStatusCode();
                 return true;
             } catch (HttpRequestException ex)
@@ -107,5 +102,12 @@ namespace ThAmCo.VenuesFacade
                 return false;
             }
         }
+
+        ~VenueReservation()
+        {
+            _client.Dispose();
+            _client = null;
+        }
+
     }
 }

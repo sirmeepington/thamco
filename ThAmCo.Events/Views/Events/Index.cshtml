@@ -13,7 +13,6 @@
     <thead>
         <tr>
             <th>
-                Info
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Title)
@@ -34,7 +33,18 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                <span class="glyphicon glyphicon-thumbs-up text-success" title="Event OK"></span>
+                @if (item.Warnings != EventWarningType.None)
+                {
+                    List<string> warnings = EventWarningUtil.GetWarnings(item.Warnings);
+                    System.Text.StringBuilder warns = new System.Text.StringBuilder();
+                    foreach (string w in warnings)
+                    {
+                        if (string.IsNullOrEmpty(w)) { continue; }
+                        warns.Append(Environment.NewLine);
+                        warns.Append(w);
+                    }
+                    <span class="glyphicon glyphicon-question-sign text-warning" title="Event has warnings: @warns.ToString()"></span>
+                }
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Title)

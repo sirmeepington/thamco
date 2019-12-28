@@ -18,6 +18,7 @@
                 <ul>
                 @foreach (string warns in warnings)
                 {
+                    if (string.IsNullOrEmpty(warns)) { continue; }
                     <li>@warns</li>
                 }
                 </ul>
@@ -44,32 +45,38 @@
 
     @foreach (ThAmCo.Events.Models.StaffIndexViewModel staff in Model.AssignedStaff)
     {
-        <dl class="dl-horizontal">
-            <dt>
-                @Html.DisplayNameFor(x => staff.Name)
-            </dt>
-            <dd>
-                @Html.DisplayFor(x => staff.Name)
-            </dd>
-            <dt>
-                @Html.DisplayNameFor(x => staff.FirstAider)
-            </dt>
-            <dd>
-                @if (staff.FirstAider)
-                {
-                    <span class="glyphicon glyphicon-ok text-success"></span>
-                }
-                else
-                {
-                    <span class="glyphicon glyphicon-remove text-danger"></span>
-                }
-            </dd>
-            <dt>Actions</dt>
-            <dd>
-                <a class="btn btn-danger" asp-action="RemoveStaff" asp-route-id="@Model.Id" asp-route-staffId="@staff.Id">Remove Staff</a>
-                <a class="btn btn-default" asp-controller="Staffs" asp-action="Details" asp-route-id="@staff.Id">View Staff</a>
-            </dd>
-        </dl>
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(x => staff.Name)
+        </dt>
+        <dd>
+            @Html.DisplayFor(x => staff.Name)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(x => staff.Email)
+        </dt>
+        <dd>
+            @Html.DisplayFor(x => staff.Email)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(x => staff.FirstAider)
+        </dt>
+        <dd>
+            @if (staff.FirstAider)
+            {
+                <span class="glyphicon glyphicon-ok text-success"></span>
+            }
+            else
+            {
+                <span class="glyphicon glyphicon-remove text-danger"></span>
+            }
+        </dd>
+        <dt>Actions</dt>
+        <dd>
+            <a class="btn btn-danger" asp-action="RemoveStaff" asp-route-id="@Model.Id" asp-route-staffId="@staff.Id">Remove Staff</a>
+            <a class="btn btn-default" asp-controller="Staffs" asp-action="Details" asp-route-id="@staff.Id">View Staff</a>
+        </dd>
+    </dl>
     }
     @if (Model.AvailableStaff.Count > 0)
     {

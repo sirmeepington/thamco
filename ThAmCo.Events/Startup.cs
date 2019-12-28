@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ThAmCo.Events.Data;
 using ThAmCo.VenuesFacade;
+using ThAmCo.VenuesFacade.EventTypes;
 
 namespace ThAmCo.Events
 {
@@ -40,6 +41,7 @@ namespace ThAmCo.Events
             });
             services.AddScoped<IVenueAvailabilities, VenueAvailabilities>();
             services.AddScoped<IVenueReservation, VenueReservation>();
+            services.AddScoped<IEventTypes, EventTypes>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

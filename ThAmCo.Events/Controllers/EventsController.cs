@@ -11,6 +11,7 @@ using ThAmCo.Venues.Data;
 using ThAmCo.Venues.Models;
 using ThAmCo.VenuesFacade;
 using ThAmCo.VenuesFacade.Availabilities;
+using ThAmCo.VenuesFacade.EventTypes;
 
 namespace ThAmCo.Events.Controllers
 {
@@ -19,12 +20,14 @@ namespace ThAmCo.Events.Controllers
         private readonly EventsDbContext _context;
         private readonly IVenueAvailabilities _availabilities;
         private readonly IVenueReservation _reservations;
+        private readonly IEventTypes _eventTypes;
 
-        public EventsController(EventsDbContext context, IVenueAvailabilities availabilities, IVenueReservation reservations)
+        public EventsController(EventsDbContext context, IVenueAvailabilities availabilities, IVenueReservation reservations, IEventTypes eventTypes)
         {
             _context = context;
             _availabilities = availabilities;
             _reservations = reservations;
+            _eventTypes = eventTypes;
         }
 
         // GET: Events
@@ -40,7 +43,8 @@ namespace ThAmCo.Events.Controllers
                     Duration = ev.Duration,
                     Id = ev.Id,
                     Title = ev.Title,
-                    TypeId = ev.TypeId
+                    TypeId = (await _eventTypes.GetEventType(ev.TypeId)).Title,
+                    Warnings = await GetWarningTypeFromEvent(ev)
                 };
                 model.Add(temp);
             }
@@ -65,7 +69,7 @@ namespace ThAmCo.Events.Controllers
                 Title = @event.Title,
                 Date = @event.Date,
                 Duration = @event.Duration,
-                TypeId = @event.TypeId,
+                TypeId = (await _eventTypes.GetEventType(@event.TypeId)).Title,
                 Bookings = await _context.Guests.Include(e => e.Customer).Include(e => e.Event).Where(e => e.EventId == id).Select(x => new GuestBookingDetailsViewModel()
                 {
                     Attended = x.Attended,
@@ -123,7 +127,7 @@ namespace ThAmCo.Events.Controllers
                     Date = @event.Date,
                     Duration = @event.Duration,
                     Id = @event.Id,
-                    TypeId = @event.TypeId,
+                    TypeId = (await _eventTypes.GetEventType(@event.TypeId)).Title,
                     Reservation = new EventReservationViewModel()
                     {
                         Reference = reservation.Reference,
@@ -174,7 +178,7 @@ namespace ThAmCo.Events.Controllers
                 Date = @event.Date,
                 Duration = @event.Duration,
                 Id = @event.Id,
-                TypeId = @event.TypeId,
+                TypeId = (await _eventTypes.GetEventType(@event.TypeId)).Title,
                 Availabilities = nonReserved,
                 AvailabilitiesSelectList = list
             };
@@ -202,7 +206,7 @@ namespace ThAmCo.Events.Controllers
                 Date = ev.Date,
                 Title = @event.Title,
                 Duration = @event.Duration,
-                TypeId = ev.TypeId,
+                TypeId = (await _eventTypes.GetEventType(ev.TypeId)).Title,
             };
             if (reservationGetDto.Reference == null)
             {
@@ -423,9 +427,28 @@ namespace ThAmCo.Events.Controllers
             EventStaffViewModel vm = new EventStaffViewModel()
             {
                 Id = ev.Id,
-                Event = new EventDetailsViewModel() { Id = ev.Id, Date = ev.Date, Title = ev.Title, TypeId = ev.TypeId, Duration = ev.Duration },
-                AvailableStaff = available,
-                AssignedStaff = eventStaff.Select(x => new StaffIndexViewModel { Id = x.Staff.Id, Email = x.Staff.Email, Name = x.Staff.Name, FirstAider = x.Staff.FirstAider }).ToList(),
+                Event = new EventDetailsViewModel() {
+                    Id = ev.Id,
+                    Date = ev.Date,
+                    Title = ev.Title,
+                    TypeId = (await _eventTypes.GetEventType(ev.TypeId)).Title,
+                    Duration = ev.Duration
+                },
+                AvailableStaff = available
+                    .Select(x => new Staff
+                    {
+                        Id = x.Id,
+                        Email = x.Email,
+                        FirstAider = x.FirstAider,
+                        Name = $"{(x.FirstAider ? "[First Aider]": "")} {x.Name} ({x.Email})"
+                    }).ToList(),
+                AssignedStaff = eventStaff
+                    .Select(x => new StaffIndexViewModel {
+                        Id = x.Staff.Id,
+                        Email = x.Staff.Email,
+                        Name = x.Staff.Name,
+                        FirstAider = x.Staff.FirstAider
+                    }).ToList(),
                 WarningType = await GetWarningTypeFromEvent(ev)
             };
 
@@ -434,17 +457,15 @@ namespace ThAmCo.Events.Controllers
 
         private async Task<EventWarningType> GetWarningTypeFromEvent(Event e)
         {
-            var staffId = await _context.EventStaff.Where(x => x.EventId == e.Id).Select(x => x.StaffId).ToListAsync();
-            var staff = await _context.Staff.Where(x => staffId.Contains(x.Id)).ToListAsync();
-
+            var staff = await _context.EventStaff.Include(x => x.Staff).Where(x => x.EventId == e.Id).Select(x => x.Staff).ToListAsync();
             EventWarningType type = EventWarningType.None;
             if (!staff.Any(x => x.FirstAider))
             {
                 type = EventWarningType.NoFirstAider;
             }
             var bookings = await _context.Guests.Where(x => x.EventId == e.Id).ToListAsync();
-            
-            if (staff.Count < (bookings.Count / 10))
+            int count = bookings.Count / 10;
+            if (staff.Count <= count)
             {
                 type |= EventWarningType.InsufficientStaff;
             }
