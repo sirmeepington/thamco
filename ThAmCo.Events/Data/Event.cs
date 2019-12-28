@@ -20,5 +20,7 @@ namespace ThAmCo.Events.Data
         public string VenueReservation { get; set; }
 
         public IEnumerable<EventStaff> Staff { get; set; }
+
+        public bool Cancelled { get; set; }
     }
 }
