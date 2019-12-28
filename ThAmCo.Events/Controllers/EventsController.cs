@@ -33,7 +33,7 @@ namespace ThAmCo.Events.Controllers
         // GET: Events
         public async Task<IActionResult> Index()
         {
-            IEnumerable <Event> e = await _context.Events.ToListAsync();
+            IEnumerable <Event> e = await _context.Events.Where(x => !x.Cancelled).ToListAsync();
             List<EventDetailsViewModel> model = new List<EventDetailsViewModel>();
             foreach (Event ev in e)
             {
@@ -58,7 +58,7 @@ namespace ThAmCo.Events.Controllers
             if (!id.HasValue)
                 return NotFound();
 
-            Event @event = await _context.Events
+            Event @event = await _context.Events.Where(x => !x.Cancelled)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (@event == null)
                 return NotFound();
@@ -103,7 +103,7 @@ namespace ThAmCo.Events.Controllers
             if (!id.HasValue)
                 return NotFound();
 
-            Event @event = await _context.Events
+            Event @event = await _context.Events.Where(x => !x.Cancelled)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (@event == null)
                 return NotFound();
@@ -196,7 +196,7 @@ namespace ThAmCo.Events.Controllers
                 return NotFound();
 
             Event @event = await _context.Events.FindAsync(id);
-            if (@event == null)
+            if (@event == null || @event.Cancelled)
                 return NotFound();
 
             ReservationGetDto reservationGetDto = await _reservations.CreateReservation(ev.Date, ev.SelectedVenue);
@@ -267,7 +267,7 @@ namespace ThAmCo.Events.Controllers
                 return NotFound();
 
             Event @event = await _context.Events.FindAsync(id);
-            if (@event == null)
+            if (@event == null || @event.Cancelled)
                 return NotFound();
 
             List<AvailabilityApiGetDto> apiGetDtos = await _availabilities.GetAvailabilities(@event.TypeId, @event.Date, @event.Date.Add(@event.Duration.Value));
@@ -375,7 +375,10 @@ namespace ThAmCo.Events.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             Event @event = await _context.Events.FindAsync(id);
-            _context.Events.Remove(@event);
+            var staff = await _context.EventStaff.Where(x => x.EventId == id).ToListAsync();
+            _context.EventStaff.RemoveRange(staff);
+            @event.Cancelled = true;
+            _context.Events.Update(@event);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
@@ -390,7 +393,7 @@ namespace ThAmCo.Events.Controllers
             if (reservation.Reference == null)
                 return NotFound();
             Event @event = await _context.Events.FindAsync(id);
-            if (@event == null)
+            if (@event == null || @event.Cancelled)
                 return NotFound();
 
             await _reservations.CancelReservation(reference);
@@ -403,7 +406,7 @@ namespace ThAmCo.Events.Controllers
                 return NotFound();
 
             var ev = await _context.Events.FindAsync(id);
-            if (ev == null || ev.Id != id)
+            if (ev == null || ev.Id != id || ev.Cancelled)
                 return NotFound();
 
             var staff = await _context.Staff.ToListAsync();
@@ -457,7 +460,7 @@ namespace ThAmCo.Events.Controllers
 
         private async Task<EventWarningType> GetWarningTypeFromEvent(Event e)
         {
-            var staff = await _context.EventStaff.Include(x => x.Staff).Where(x => x.EventId == e.Id).Select(x => x.Staff).ToListAsync();
+            var staff = await _context.EventStaff.Include(x => x.Staff).Include(x => x.Event).Where(x => x.EventId == e.Id && !x.Event.Cancelled).Select(x => x.Staff).ToListAsync();
             EventWarningType type = EventWarningType.None;
             if (!staff.Any(x => x.FirstAider))
             {

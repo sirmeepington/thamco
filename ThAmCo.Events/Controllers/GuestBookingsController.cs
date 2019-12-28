@@ -25,7 +25,7 @@ namespace ThAmCo.Events.Controllers
                                     .Include(g => g.Event);
             if (id.HasValue)
             {
-                Event ev = await _context.Events
+                Event ev = await _context.Events.Where(x => !x.Cancelled)
                                 .FirstOrDefaultAsync(e => e.Id == id);
                 if (ev != null)
                 {
@@ -105,7 +105,7 @@ namespace ThAmCo.Events.Controllers
                 .Include(g => g.Event)
                 .FirstOrDefaultAsync(m => m.CustomerId == customerId && m.EventId == id);
 
-            if (guestBooking == null)
+            if (guestBooking == null || guestBooking.Event.Cancelled)
                 return NotFound();
 
             GuestBookingRemoveViewModel viewModel = new GuestBookingRemoveViewModel()

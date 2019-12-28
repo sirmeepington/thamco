@@ -40,7 +40,7 @@ namespace ThAmCo.Events.Controllers
                 return NotFound();
             }
 
-            var events = await _context.EventStaff.Include(x => x.Event).Where(x => x.StaffId == staff.Id).ToListAsync();
+            var events = await _context.EventStaff.Include(x => x.Event).Where(x => x.StaffId == staff.Id && !x.Event.Cancelled).ToListAsync();
 
             StaffDetailsViewModel staffEventViewModel = new StaffDetailsViewModel()
             {
