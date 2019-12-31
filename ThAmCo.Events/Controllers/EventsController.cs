@@ -226,7 +226,8 @@ namespace ThAmCo.Events.Controllers
                 Date = ev.Date,
                 Title = @event.Title,
                 Duration = @event.Duration,
-                TypeId = (await _eventTypes.GetEventType(ev.TypeId)).Title,
+                TypeId = ev.TypeId,
+                TypeTitle = (await _eventTypes.GetEventType(ev.TypeId)).Title
             };
             if (reservationGetDto.Reference == null)
             {

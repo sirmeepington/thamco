@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace ThAmCo.Events.Models
 {
@@ -13,6 +14,7 @@ namespace ThAmCo.Events.Models
 
         public TimeSpan? Duration { get; set; }
 
+        [Display(Name = "Event Type")]
         public string TypeId { get; set; }
 
         public bool Cancelled { get; set; }
