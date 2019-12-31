@@ -68,8 +68,11 @@ namespace ThAmCo.VenuesFacade
 
         ~VenueAvailabilities()
         {
-            _client.Dispose();
-            _client = null;
+            if (_client != null)
+            {
+                _client.Dispose();
+                _client = null;
+            }
         }
     }
 }

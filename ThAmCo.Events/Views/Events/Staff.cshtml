@@ -1,10 +1,10 @@
 ﻿@model ThAmCo.Events.Models.EventStaffViewModel
 
 @{
-    ViewData["Title"] = "Staff";
+    ViewData["Title"] = "Event Staff";
 }
 
-<h2>Staff</h2>
+<h2>Staff for Event: @Html.DisplayFor(x => x.Event.Title)</h2>
 
 <div>
     <h4>Event</h4>

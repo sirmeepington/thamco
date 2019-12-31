@@ -19,8 +19,10 @@ namespace ThAmCo.Events.Models
         [DisplayFormat(DataFormatString = "{0:hh}h {0:mm}m {0:ss}s")] // 01h 12m 30s
         public TimeSpan? Duration { get; set; }
 
-        [Display(Name = "Event Type")]
         public string TypeId { get; set; }
+
+        [Display(Name = "Event Type")]
+        public string TypeTitle { get; set; }
 
         public Venue Venue { get; set; }
 

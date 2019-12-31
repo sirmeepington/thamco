@@ -40,7 +40,7 @@ namespace ThAmCo.VenuesFacade.EventTypes
             return dtos.FirstOrDefault(x => x.Id == type);
         }
 
-        private async Task<List<EventTypeDto>> GetEventTypes()
+        public async Task<List<EventTypeDto>> GetEventTypes()
         {
             if (!EnsureClient())
                 return null;
@@ -62,8 +62,11 @@ namespace ThAmCo.VenuesFacade.EventTypes
 
         ~EventTypes()
         {
-            _client.Dispose();
-            _client = null;
+            if (_client != null)
+            {
+                _client.Dispose();
+                _client = null;
+            }
         }
     }
 }

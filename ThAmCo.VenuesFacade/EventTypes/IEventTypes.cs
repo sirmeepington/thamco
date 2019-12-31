@@ -10,5 +10,6 @@ namespace ThAmCo.VenuesFacade.EventTypes
 
         Task<EventTypeDto> GetEventType(string type);
 
+        Task<List<EventTypeDto>> GetEventTypes();
     }
 }

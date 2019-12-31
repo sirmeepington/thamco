@@ -32,7 +32,7 @@ namespace ThAmCo.Events.Controllers
             {
                 Id = customer.Id,
                 FirstName = customer.FirstName,
-                Surname = customer.FirstName,
+                Surname = customer.Surname,
                 Email = customer.Email,
                 Bookings = await _context.Guests
                                 .Include(b => b.Customer)

@@ -140,7 +140,8 @@ namespace ThAmCo.Events.Controllers
                     Date = @event.Date,
                     Duration = @event.Duration,
                     Id = @event.Id,
-                    TypeId = (await _eventTypes.GetEventType(@event.TypeId)).Title,
+                    TypeId = @event.TypeId,
+                    TypeTitle = (await _eventTypes.GetEventType(@event.TypeId)).Title,
                     Reservation = new EventReservationViewModel()
                     {
                         Reference = reservation.Reference,
@@ -196,7 +197,8 @@ namespace ThAmCo.Events.Controllers
                 Date = @event.Date,
                 Duration = @event.Duration,
                 Id = @event.Id,
-                TypeId = (await _eventTypes.GetEventType(@event.TypeId)).Title,
+                TypeId = @event.TypeId,
+                TypeTitle = (await _eventTypes.GetEventType(@event.TypeId)).Title,
                 Availabilities = nonReserved,
                 AvailabilitiesSelectList = list
             };
@@ -261,7 +263,13 @@ namespace ThAmCo.Events.Controllers
         }
 
         // GET: Events/Create
-        public IActionResult Create() => View();
+        public async Task<IActionResult> Create()
+        {
+            List<EventTypeDto> typeIds = await _eventTypes.GetEventTypes();
+            List<EventTypeViewModel> types = typeIds.Select(x => new EventTypeViewModel() { Id = x.Id, Title = x.Title }).ToList();
+            EventCreateViewModel ev = new EventCreateViewModel() { ValidTypeIds = types };
+            return View(ev);
+        }
 
         // POST: Events/Create
         [HttpPost]
@@ -392,7 +400,16 @@ namespace ThAmCo.Events.Controllers
             if (@event == null)
                 return NotFound();
 
-            return View(@event);
+            EventDeleteViewModel vm = new EventDeleteViewModel()
+            {
+                Title = @event.Title,
+                Id = @event.Id,
+                Date = @event.Date,
+                Duration = @event.Duration,
+                TypeId = (await _eventTypes.GetEventType(@event.TypeId)).Title,
+                VenueReservation = @event.VenueReservation
+            };
+            return View(vm);
         }
 
         // POST: Events/Delete/5

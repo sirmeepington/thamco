@@ -22,7 +22,9 @@ namespace ThAmCo.Events.Controllers
         {
             var eventsDbContext = _context.Guests
                                     .Include(g => g.Customer)
-                                    .Include(g => g.Event);
+                                    .Include(g => g.Event)
+                                    .Where(g => !g.Customer.Deleted)
+                                    .Where(g => !g.Event.Cancelled);
             if (id.HasValue)
             {
                 Event ev = await _context.Events.Where(x => !x.Cancelled)

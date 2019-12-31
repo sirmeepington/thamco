@@ -6,7 +6,7 @@
 <h2>@ViewData["Title"] (@Model.Count())</h2>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a class="btn btn-success" asp-action="Create">Add Booking</a>
 </p>
 <table class="table">
     <thead>
@@ -27,7 +27,7 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Customer.Email)
+                @Html.DisplayFor(modelItem => item.Customer.FullName)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Event.Title)
@@ -36,11 +36,11 @@
             @{  
                 if (item.Attended)
                 {
-                    @:<span class="glyphicon glyphicon-ok"></span>
+                    @:<span class="glyphicon glyphicon-ok text-success"></span>
                 }
                 else
                 {
-                    @:<span class="glyphicon glyphicon-remove"></span>
+                    @:<span class="glyphicon glyphicon-remove text-danger"></span>
                 }
             }
             </td>
@@ -48,14 +48,14 @@
                 @{
                     if (!item.Attended)
                     {
-                        @Html.ActionLink("Attend", "Attend", new
-                        {
-                            id = item.EventId,
-                            customerId = item.CustomerId
-                        });
-                        @:|
+                       @Html.ActionLink("Mark Attendance", "Attend", new
+                       {
+                           id = item.EventId,
+                           customerId = item.CustomerId
+                       }, new { @class = "btn btn-default"}); 
+                       @: 
                     }
-                    @Html.ActionLink("Remove", "Remove", new { id = item.EventId, customerId = item.CustomerId })
+                    @Html.ActionLink("Remove", "Remove", new { id = item.EventId, customerId = item.CustomerId }, new { @class = "btn btn-danger" })
                 }
             </td>
         </tr>

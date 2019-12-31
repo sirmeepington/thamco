@@ -1,7 +1,7 @@
 ﻿@model ThAmCo.Events.Models.EventVenueViewModel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Venue Details";
 }
 
 <h2>Venue Details for @Model.Title</h2>
@@ -11,10 +11,10 @@
     <h4>Event Details</h4>
     <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.TypeId):
+            @Html.DisplayNameFor(model => model.TypeTitle):
         </dt>
         <dd>
-            <span id="typeId">@Html.DisplayFor(model => model.TypeId)</span>
+            <span>@Html.DisplayFor(model => model.TypeTitle)</span>
         </dd>
         <dt>
             @Html.DisplayNameFor(model => model.Date):
@@ -33,7 +33,7 @@
     @if (Model.Reservation == null)
     {
         <p>No venue reservation found for current Event.</p>
-        <hr/>
+        <hr />
         <h4>Availabilities</h4>
         @if (Model.Availabilities.Count > 0)
         {
@@ -53,7 +53,7 @@
         {
             <p>No venue availabilities were found for this day, Sorry.</p>
         }
-        <br />
+        <span id="typeId" class="invisible">@Html.DisplayFor(model => model.TypeId)</span>
     }
     else
     {
@@ -96,7 +96,7 @@
         </dl>
         <form asp-action="VenueCancel" asp-route-id="@Model.Id">
             <input asp-for="@Model.Id" type="hidden" />
-            <input asp-for="@Model.ReservationReference" name="reference" type="hidden"/>
+            <input asp-for="@Model.ReservationReference" name="reference" type="hidden" />
             <input type="submit" class="btn btn-danger" value="Cancel Reservation" />
         </form>
     }
