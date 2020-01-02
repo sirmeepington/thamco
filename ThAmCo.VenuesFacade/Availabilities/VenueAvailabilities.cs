@@ -9,6 +9,7 @@ using ThAmCo.VenuesFacade.Availabilities;
 
 namespace ThAmCo.VenuesFacade
 {
+    /// <inheritdoc />
     public class VenueAvailabilities : IVenueAvailabilities
     {
 
@@ -23,10 +24,10 @@ namespace ThAmCo.VenuesFacade
             _config = config;
         }
 
-        private bool EnsureClient()
+        private void EnsureClient()
         {
             if (_client != null)
-                return true;
+                return;
 
             _client = new HttpClient()
             {
@@ -34,14 +35,13 @@ namespace ThAmCo.VenuesFacade
                 Timeout = TimeSpan.FromSeconds(5)
             };
             _client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
-            return true;
         }
 
+        /// <inheritdoc />
         public async Task<List<AvailabilityApiGetDto>> GetAvailabilities(string eventType, DateTime from, DateTime to)
         {
-            if (!EnsureClient()) {
-                return new List<AvailabilityApiGetDto>();
-            }
+            EnsureClient();
+
             List<AvailabilityApiGetDto> venue;
             try
             {

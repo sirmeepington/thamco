@@ -7,16 +7,31 @@ using ThAmCo.Events.Models;
 
 namespace ThAmCo.Events.Controllers
 {
+    /// <summary>
+    /// ASP.NET MVC Controller for /Customers/*
+    /// </summary>
     public class CustomersController : Controller
     {
         private readonly EventsDbContext _context;
 
         public CustomersController(EventsDbContext context) => _context = context;
 
-        // GET: Customers
+        /// <summary>
+        /// HTTP GET endpoint for "/Customers/". <para/>
+        /// Returns a <see cref="System.Collections.Generic.List{T}"/> (T is <see cref="Customer"/>)
+        /// of all customers to the Index view.
+        /// </summary>
+        /// <returns>Redirects the user to the Index view.</returns>
         public async Task<IActionResult> Index() => View(await _context.Customers.Where(c => !c.Deleted).ToListAsync());
 
-        // GET: Customers/Details/5
+        /// <summary>
+        /// HTTP GET endpoint for "/Customers/Details/<paramref name="id"/>". <para/>
+        /// Creates a new <see cref="CustomerDetailsViewModel"/> to the Details view. <para/>
+        /// The view model created nests a <see cref="GuestBookingDetailsViewModel"/> and 
+        /// <see cref="EventDetailsViewModel"/> for the sake of matching the view model to the request type.
+        /// </summary>
+        /// <param name="id">The <see cref="Customer"/>'s Id.</param>
+        /// <returns>Redirects the user to the Details view.</returns>
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -58,12 +73,21 @@ namespace ThAmCo.Events.Controllers
             return View(model);
         }
 
-        // GET: Customers/Create
+        /// <summary>
+        /// HTTP GET endpoint for "/Customers/Create". <para/>
+        /// Redirects the user to the creation view without any model attached.
+        /// </summary>
+        /// <returns>Redirects the user to the Create view.</returns>
         public IActionResult Create() => View();
 
-        // POST: Customers/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        /// <summary>
+        /// HTTP POST endpoint for "/Customers/Create". <para/>
+        /// Redirects the user to the creation view without any model attached.
+        /// </summary>
+        /// <param name="customer">The <see cref="CustomerCreateViewModel"/> to which the data
+        /// is bound to.</param>
+        /// <returns>Redirects the user to the <see cref="Index"/> view on success or 
+        /// <see cref="Create(CustomerCreateViewModel)"/> on fail.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Surname,FirstName,Email")] CustomerCreateViewModel customer)
@@ -84,7 +108,12 @@ namespace ThAmCo.Events.Controllers
             return View(customer);
         }
 
-        // GET: Customers/Edit/5
+        /// <summary>
+        /// HTTP GET endpoint for "/Customers/Edit/<paramref name="id"/>". <para/>
+        /// Redirects the user to the edit view with an attached <see cref="CustomerEditViewModel"/>.
+        /// </summary>
+        /// <param name="id">The <see cref="Customer"/>'s Id.</param>
+        /// <returns>Redirects the user to the <see cref="Edit(int, CustomerEditViewModel)"/> view.</returns>
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -105,9 +134,15 @@ namespace ThAmCo.Events.Controllers
             return View(model);
         }
 
-        // POST: Customers/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        /// <summary>
+        /// HTTP POST endpoint for "/Customers/Edit/<paramref name="id"/>". <para/>
+        /// Redirects the user to the creation view without any model attached.
+        /// </summary>
+        /// <param name="id">The <see cref="Customer"/>'s Id.</param>
+        /// <param name="customer">The <see cref="CustomerEditViewModel"/> to which the
+        /// data is bound to.</param>
+        /// <returns>Redirects the user to the <see cref="Index"/> view on success 
+        /// or <see cref="Edit(int?)"/> view on fail.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Surname,FirstName,Email")] CustomerEditViewModel customer)
@@ -115,35 +150,40 @@ namespace ThAmCo.Events.Controllers
             if (id != customer.Id)
                 return NotFound();
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return View(customer);
+
+            try
             {
-                try
-                {
-                    Customer currentCustomer = await _context.Customers
-                        .FirstOrDefaultAsync(c => c.Id == customer.Id && !c.Deleted);
-                    if (currentCustomer == null)
-                        return BadRequest();
+                Customer currentCustomer = await _context.Customers
+                    .FirstOrDefaultAsync(c => c.Id == customer.Id && !c.Deleted);
+                if (currentCustomer == null)
+                    return BadRequest();
 
-                    currentCustomer.Email = customer.Email;
-                    currentCustomer.FirstName = customer.FirstName;
-                    currentCustomer.Surname = customer.Surname;
+                currentCustomer.Email = customer.Email;
+                currentCustomer.FirstName = customer.FirstName;
+                currentCustomer.Surname = customer.Surname;
 
-                    _context.Update(currentCustomer);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CustomerExists(customer.Id))
-                        return NotFound();
-                    else
-                        throw;
-                }
-                return RedirectToAction(nameof(Index));
+                _context.Update(currentCustomer);
+                await _context.SaveChangesAsync();
             }
-            return View(customer);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!CustomerExists(customer.Id))
+                    return NotFound();
+                else
+                    throw;
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: Customers/Delete/5
+        /// <summary>
+        /// HTTP GET endpoint for "/Customers/Delete/<paramref name="id"/>". <para/>
+        /// Redirects the user to the deletion confirmation view.
+        /// </summary>
+        /// <param name="id">The <see cref="Customer"/>'s Id.</param>
+        /// <returns>Redirects the user to the <see cref="DeleteConfirmed(int)"/> view.</returns>
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -158,7 +198,13 @@ namespace ThAmCo.Events.Controllers
             return View(customer);
         }
 
-        // POST: Customers/Delete/5
+        /// <summary>
+        /// HTTP GET endpoint for "/Customers/Create/<paramref name="id"/>". <para/>
+        /// Anonymises the user's identifiable information and removes the other related
+        /// information such as bookings.
+        /// </summary>
+        /// <param name="id">The <see cref="Customer"/>'s Id.</param>
+        /// <returns>Redirects the user to the <see cref="Index"/> view.</returns>
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -174,6 +220,11 @@ namespace ThAmCo.Events.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        /// <summary>
+        /// Checks whether or not a <see cref="Customer"/> with the given <paramref name="id"/> exists.
+        /// </summary>
+        /// <param name="id">The Id of a <see cref="Customer"/>.</param>
+        /// <returns>True if a <see cref="Customer"/> with the given <paramref name="id"/> exists.</returns>
         private bool CustomerExists(int id) => _context.Customers.Where(c => !c.Deleted).Any(e => e.Id == id);
     }
 }

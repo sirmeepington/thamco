@@ -15,14 +15,34 @@ using ThAmCo.VenuesFacade.EventTypes;
 
 namespace ThAmCo.Events.Controllers
 {
+    /// <summary>
+    /// ASP.NET MVC Controller for the endpoint /Events/*
+    /// </summary>
     public class EventsController : Controller
     {
+        /// <summary>
+        /// Event database context
+        /// </summary>
         private readonly EventsDbContext _context;
+        /// <summary>
+        /// Interface for checking venue availabilities.
+        /// </summary>
         private readonly IVenueAvailabilities _availabilities;
+        /// <summary>
+        /// Interface for assigning and removing reservations.
+        /// </summary>
         private readonly IVenueReservation _reservations;
+        /// <summary>
+        /// Interface for accessing full names of event types via their ID.
+        /// </summary>
         private readonly IEventTypes _eventTypes;
 
-        public EventsController(EventsDbContext context, IVenueAvailabilities availabilities, IVenueReservation reservations, IEventTypes eventTypes)
+        public EventsController(
+            EventsDbContext context, 
+            IVenueAvailabilities availabilities, 
+            IVenueReservation reservations, 
+            IEventTypes eventTypes
+            )
         {
             _context = context;
             _availabilities = availabilities;
@@ -30,7 +50,10 @@ namespace ThAmCo.Events.Controllers
             _eventTypes = eventTypes;
         }
 
-        // GET: Events
+        /// <summary>
+        /// HTTP GET endpoint for "/Events/" <para/>
+        /// </summary>
+        /// <returns>A <see cref="EventDetailsViewModel"/> for every event collated into a <see cref="List{T}"/>.</returns>
         public async Task<IActionResult> Index()
         {
             IEnumerable <Event> e = await _context.Events.Where(x => !x.Cancelled).ToListAsync();
@@ -52,7 +75,11 @@ namespace ThAmCo.Events.Controllers
             return View(model);
         }
 
-        // GET: Events/Details/5
+        /// <summary>
+        /// HTTP GET endpoint for "/Events/Details/<paramref name="id"/>" <para/>
+        /// </summary>
+        /// <param name="id">The <see cref="Event"/>'s Id</param>
+        /// <returns>A <see cref="EventDetailsViewModel"/> the specified event.</returns>
         public async Task<IActionResult> Details(int? id)
         {
             if (!id.HasValue)
@@ -74,7 +101,7 @@ namespace ThAmCo.Events.Controllers
                     .Include(e => e.Customer)
                     .Include(e => e.Event)
                     .Where(e => e.EventId == id)
-                    .Select(x => new GuestBookingDetailsViewModel()
+                    .Select(x => new GuestBookingDetailsViewModel() // Convert to nested view models
                     {
                         Attended = x.Attended,
                         Customer = new CustomerDetailsViewModel()
@@ -101,6 +128,11 @@ namespace ThAmCo.Events.Controllers
             return View(viewModel);
         }
 
+        /// <summary>
+        /// A HTTP GET endpoint for "/Events/Venue/<paramref name="id"/>"
+        /// </summary>
+        /// <param name="id">The Id to be mapped to <see cref="Event.Id"/>.</param>
+        /// <returns>A <see cref="EventVenueViewModel"/> for the <see cref="Event"/> returned via the Id <paramref name="id"/></returns>
         [HttpGet]
         public async Task<IActionResult> Venue(int? id)
         {
@@ -145,7 +177,8 @@ namespace ThAmCo.Events.Controllers
                     Reservation = new EventReservationViewModel()
                     {
                         Reference = reservation.Reference,
-                        //StaffId = reservation.StaffId,
+                        //StaffId = reservation.StaffId, // In the case of StaffId, it makes little sense having to include a single staff for a reservation
+                                                         // when many staff can be assigned to an event and be added/removed at will.
                         WhenMade = reservation.WhenMade,
                         VenueCode = reservation.VenueCode,
                         EventDate = reservation.EventDate
@@ -156,7 +189,8 @@ namespace ThAmCo.Events.Controllers
                 return View(reservedViewModel);
             }
 
-            NO_RES:
+            NO_RES: // Label to redirect execution out of the if statement and to avoid nested / inverted if statements.
+                    // (I know a few people who would kill me for using this.)
             List<AvailabilityApiGetDto> apiGetDtoList = await _availabilities
                 .GetAvailabilities(@event.TypeId, @event.Date, @event.Date.Add(@event.Duration.Value));
             List<Availability> availabilities = apiGetDtoList
@@ -174,18 +208,20 @@ namespace ThAmCo.Events.Controllers
                     }
                 }).ToList();
 
+            // This block may be redundant depending on the availability behaviour and if a reserved availability is not included in the list.
+            // (I assume it is not; thus this code block is commented out.)
 
-            List<Availability> nonReserved = new List<Availability>();
-            foreach (Availability availability in availabilities)
-            {
-                ReservationGetDto reservations = await _reservations.GetReservation(availability.VenueCode, @event.Date);
-                if (reservations.Reference == null)
-                    nonReserved.Add(availability);
-            }
-            availabilities.Clear();
+            //List<Availability> nonReserved = new List<Availability>();
+            //foreach (Availability availability in availabilities) 
+            //{
+            //    ReservationGetDto reservations = await _reservations.GetReservation(availability.VenueCode, @event.Date);
+            //    if (reservations.Reference == null)
+            //        nonReserved.Add(availability); // If the availability in the list has a reservation assigne then it is reserved.
+            //}
+            //availabilities.Clear();
 
             SelectList list = new SelectList(
-                nonReserved.Select(x => new {
+                availabilities.Select(x => new {
                     x.Venue.Name,
                     x.VenueCode,
                     x.Date,
@@ -199,12 +235,18 @@ namespace ThAmCo.Events.Controllers
                 Id = @event.Id,
                 TypeId = @event.TypeId,
                 TypeTitle = (await _eventTypes.GetEventType(@event.TypeId)).Title,
-                Availabilities = nonReserved,
+                Availabilities = availabilities,
                 AvailabilitiesSelectList = list
             };
             return View(novenue);
         }
 
+        /// <summary>
+        /// A HTTP POST endpoint for "/Events/Venue/<paramref name="id"/>"
+        /// </summary>
+        /// <param name="id">The Id to be mapped to <see cref="Event.Id"/>.</param>
+        /// <param name="ev">A <see cref="EventVenueViewModel"/> whose information is filled during the previous GET view.</param>
+        /// <returns>A <see cref="EventVenueViewModel"/> for the <see cref="Event"/> returned via the Id <paramref name="id"/></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Venue(int? id, [Bind("Id,Date,SelectedVenue,TypeId")] EventVenueViewModel ev)
@@ -219,7 +261,10 @@ namespace ThAmCo.Events.Controllers
             if (@event == null || @event.Cancelled)
                 return NotFound();
 
+            // Create the reservation.
             ReservationGetDto reservationGetDto = await _reservations.CreateReservation(ev.Date, ev.SelectedVenue);
+
+            // Empty view model in case reservation fails.
             EventVenueViewModel model = new EventVenueViewModel()
             {
                 Id = ev.Id,
@@ -229,50 +274,67 @@ namespace ThAmCo.Events.Controllers
                 TypeId = ev.TypeId,
                 TypeTitle = (await _eventTypes.GetEventType(ev.TypeId)).Title
             };
+
             if (reservationGetDto.Reference == null)
-            {
                 return View(model);
-            } else
+
+            // Assign reservation information.
+            model.Reservation = new EventReservationViewModel()
             {
-                model.Reservation = new EventReservationViewModel()
-                {
-                    EventDate = reservationGetDto.EventDate,
-                    Reference = reservationGetDto.Reference,
-                    //StaffId = reservationGetDto.StaffId,
-                    VenueCode = reservationGetDto.VenueCode,
-                    WhenMade = reservationGetDto.WhenMade
-                };
+                EventDate = reservationGetDto.EventDate,
+                Reference = reservationGetDto.Reference,
+                //StaffId = reservationGetDto.StaffId, // Read above for the same reasoning for the removal of this property.
+                VenueCode = reservationGetDto.VenueCode,
+                WhenMade = reservationGetDto.WhenMade
+            };
 
-                List<AvailabilityApiGetDto> avail = await _availabilities
-                    .GetAvailabilities(ev.TypeId, new DateTime(2018, 07, 10), new DateTime(2019, 2, 10));
-                Venue venue = avail
-                    .Where(x => x.Code == reservationGetDto.VenueCode)
-                    .Select(a => new Venue() {
-                        Code = a.Code,
-                        Capacity = a.Capacity,
-                        Description = a.Description,
-                        Name = a.Name })
-                    .FirstOrDefault();
-                model.Venue = venue;
+            // Get venue information from any other availabilities of the same VenueCode (due to the lack of
+            // information on the API).
+            List<AvailabilityApiGetDto> avail = await _availabilities
+                .GetAvailabilities(ev.TypeId, new DateTime(2018, 07, 10), new DateTime(2019, 2, 10));
+            Venue venue = avail
+                .Where(x => x.Code == reservationGetDto.VenueCode)
+                .Select(a => new Venue() {
+                    Code = a.Code,
+                    Capacity = a.Capacity,
+                    Description = a.Description,
+                    Name = a.Name })
+                .FirstOrDefault();
+            model.Venue = venue;
 
-                @event.VenueReservation = reservationGetDto.Reference;
-                model.ReservationReference = reservationGetDto.Reference;
-                await _context.SaveChangesAsync();
-            }
-
+            // Update reservation on the database entity.
+            @event.VenueReservation = reservationGetDto.Reference;
+            model.ReservationReference = reservationGetDto.Reference;
+            await _context.SaveChangesAsync(); // Push database changes.
+            
+            // Show that view model from before.
             return View(model);
         }
 
-        // GET: Events/Create
+        /// <summary>
+        /// A HTTP GET endpoint for "/Events/Create". <para/>
+        /// Shows information used for creation of a new <see cref="Event"/>.
+        /// </summary>
+        /// <returns>A <see cref="EventCreateViewModel"/> that contains a list of
+        /// available <see cref="EventType.Id"/>s.</returns>
         public async Task<IActionResult> Create()
         {
             List<EventTypeDto> typeIds = await _eventTypes.GetEventTypes();
-            List<EventTypeViewModel> types = typeIds.Select(x => new EventTypeViewModel() { Id = x.Id, Title = x.Title }).ToList();
+            List<EventTypeViewModel> types = null;
+            if (typeIds != null)
+            {
+                types = typeIds.Select(x => new EventTypeViewModel() { Id = x.Id, Title = x.Title }).ToList();
+            }
             EventCreateViewModel ev = new EventCreateViewModel() { ValidTypeIds = types };
             return View(ev);
         }
 
-        // POST: Events/Create
+        /// <summary>
+        /// A HTTP POST endpoint for "/Events/Create/". <para/>
+        /// Uses the given <paramref name="event"/> to create a new <see cref="Event"/> from the bound data.
+        /// </summary>
+        /// <param name="event">The <see cref="EventCreateViewModel"/> which contains the bound information.</param>
+        /// <returns>A redirection to the <see cref="Index"/> view.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Title,Date,Duration,TypeId")] EventCreateViewModel @event)
@@ -294,7 +356,13 @@ namespace ThAmCo.Events.Controllers
             
         }
 
-        // GET: Events/Edit/5
+        /// <summary>
+        /// A HTTP GET endpoint for "/Events/Edit/<paramref name="id"/>". <para/>
+        /// Shows edit options for the given <see cref="Event"/>'s <paramref name="id"/>.
+        /// </summary>
+        /// <param name="id">The Id to be mapped to <see cref="Event.Id"/>.</param>
+        /// <returns>An <see cref="EventEditViewModel"/> which is sent to the 
+        /// Edit view.</returns>
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -336,7 +404,14 @@ namespace ThAmCo.Events.Controllers
             return View(eventEditViewModel);
         }
 
-        // POST: Events/Edit/5
+        /// <summary>
+        /// A HTTP POST endpoint for "/Events/Edit/<paramref name="id"/>". <para/>
+        /// Edits the event's information within the database to the options given via <paramref name="event"/>.
+        /// </summary>
+        /// <param name="id">The Id to be mapped to <see cref="Event.Id"/>.</param>
+        /// <param name="event">The bound information to be edited into the existing <see cref="Event"/>.</param>
+        /// <returns>If the information sent via <paramref name="event"/> is valid; the user is redirected to
+        /// the <see cref="Index"/> view; otherwise they are redirected to the <see cref="Edit(int?)"/> view.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Duration,VenueToReserve")] EventEditViewModel @event)
@@ -344,52 +419,40 @@ namespace ThAmCo.Events.Controllers
             if (id != @event.Id)
                 return NotFound();
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return View(@event);
+
+            try
             {
-                try
-                {
 
-                    Event e = await _context.Events
-                        .FirstOrDefaultAsync(dbEvent => dbEvent.Id == @event.Id);
-                    if (e == null)
-                        return BadRequest();
+                Event e = await _context.Events
+                    .FirstOrDefaultAsync(dbEvent => dbEvent.Id == @event.Id);
+                if (e == null)
+                    return BadRequest();
 
-                    // Reservation
-                    Availability eventDto = @event.VenueToReserve;
-                    if (eventDto != null)
-                    {
-                        ReservationGetDto re = await _reservations.GetReservation(eventDto.VenueCode, e.Date);
-                        if (re == null)
-                        {
-                            // No reservation. Try and make one.
-                            re = await _reservations.CreateReservation(e.Date, eventDto.VenueCode);
-                        }
-                        else
-                        {
-                            await _reservations.CancelReservation(re.Reference);
-                            re = await _reservations.CreateReservation(e.Date, eventDto.VenueCode);
-                        }
-                    }
-                    // End Reservation
-
-                    e.Duration = @event.Duration;
-                    e.Title = @event.Title;
-                    _context.Update(e);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!EventExists(@event.Id))
-                        return NotFound();
-                    else
-                        throw;
-                }
-                return RedirectToAction(nameof(Index));
+                e.Duration = @event.Duration;
+                e.Title = @event.Title;
+                _context.Update(e);
+                await _context.SaveChangesAsync();
             }
-            return View(@event);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!EventExists(@event.Id))
+                    return NotFound();
+                else
+                    throw;
+            }
+            return RedirectToAction(nameof(Index));
+
         }
 
-        // GET: Events/Delete/5
+        /// <summary>
+        /// A HTTP GET endpoint for "/Events/Delete/<paramref name="id"/>. <para/>
+        /// Creates an <see cref="EventDeleteViewModel"/> with the information required by the View;
+        /// shows confirmation of deletion of the event from the given <paramref name="id"/>.
+        /// </summary>
+        /// <param name="id">The Id to be bound to <see cref="Event.Id"/>.</param>
+        /// <returns>The Delete view with a respective <see cref="EventDeleteViewModel"/>.</returns>
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -413,7 +476,12 @@ namespace ThAmCo.Events.Controllers
             return View(vm);
         }
 
-        // POST: Events/Delete/5
+        /// <summary>
+        /// A HTTP POST endpoint for "/Events/Delete/<paramref name="id"/>". <para/>
+        /// Deletes the <see cref="Event"/> record within the database; freeing the staff and the venue reservation.
+        /// </summary>
+        /// <param name="id">The Id to be bound to <see cref="Event.Id"/>.</param>
+        /// <returns>The <see cref="Index"/> view if the deletion is successful.</returns>
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -426,13 +494,21 @@ namespace ThAmCo.Events.Controllers
             _context.EventStaff.RemoveRange(staff);
 
             if (!string.IsNullOrEmpty(@event.VenueReservation))
-                await _reservations.CancelReservation(@event.VenueReservation);
+                if (await _reservations.CancelReservation(@event.VenueReservation))
+                    @event.VenueReservation = null;
             @event.Cancelled = true;
             _context.Events.Update(@event);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
+        /// <summary>
+        /// A HTTP POST endpoint for "/Events/VenueCancel/<paramref name="id"/>". <para/>
+        /// Cancels the Venue reservation from the <paramref name="reference"/> given.
+        /// </summary>
+        /// <param name="id">The Id to be mapped to <see cref="Event.Id"/>.</param>
+        /// <param name="reference">The <see cref="Venues.Data.Venue"/>'s <see cref="Venues.Data.Reservation"/> reference.</param>
+        /// <returns>The <see cref="Venue"/> view if the deletion is successful.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> VenueCancel(int? id, string reference)
@@ -452,6 +528,13 @@ namespace ThAmCo.Events.Controllers
             return RedirectToAction(nameof(Venue), new { id });
         }
 
+        /// <summary>
+        /// A HTTP GET endpoint for "/Events/Saff/<paramref name="id"/>". <para/>
+        /// Views the <see cref="Data.Staff"/> information for the given <see cref="Event"/> via a new 
+        /// <see cref="EventStaffViewModel"/>.
+        /// </summary>
+        /// <param name="id">The Id to be mapped to <see cref="Event.Id"/>.</param>
+        /// <returns>The <see cref="Staff"/> with a <see cref="EventStaffViewModel"/>.</returns>
         public async Task<IActionResult> Staff(int? id)
         {
             if (!id.HasValue)
@@ -510,6 +593,11 @@ namespace ThAmCo.Events.Controllers
             return View(vm);
         }
 
+        /// <summary>
+        /// Calculates the <see cref="EventWarningType"/> enum value from the given <see cref="Event"/>.
+        /// </summary>
+        /// <param name="e">The <see cref="Event"/> to check the warnings of.</param>
+        /// <returns>The applicable <see cref="EventWarningType"/> for the given <see cref="Event"/>.</returns>
         private async Task<EventWarningType> GetWarningTypeFromEvent(Event e)
         {
             var staff = await _context.EventStaff
@@ -534,6 +622,13 @@ namespace ThAmCo.Events.Controllers
             return type;
         }
 
+        /// <summary>
+        /// HTTP POST endpoint of "/Events/AddStaff/<paramref name="Id"/>". <para/>
+        /// Adds a staff member via their <paramref name="StaffId"/> to the <see cref="Event"/> via its <paramref name="Id"/>.
+        /// </summary>
+        /// <param name="Id">The <see cref="Event"/>'s Id.</param>
+        /// <param name="StaffId">The <see cref="Data.Staff"/>'s Id.</param>
+        /// <returns>Takes the user to the <see cref="Staff"/> page.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddStaff(int? Id, int StaffId)
@@ -558,8 +653,13 @@ namespace ThAmCo.Events.Controllers
 
         }
 
-        private bool EventExists(int id) => _context.Events.Where(c => !c.Cancelled).Any(e => e.Id == id);
-
+        /// <summary>
+        /// HTTP GET endpoint of "Events/RemoveStaff/<paramref name="Id"/>?StaffId=<paramref name="StaffId"/>". <para/>
+        /// Removes a staff member via their <paramref name="StaffId"/> to the <see cref="Event"/> via its <paramref name="Id"/>.
+        /// </summary>
+        /// <param name="Id">The <see cref="Event"/>'s Id.</param>
+        /// <param name="StaffId">The <see cref="Data.Staff"/>'s Id.</param>
+        /// <returns>Takes the user to the <see cref="Staff"/> page.</returns>
         public async Task<IActionResult> RemoveStaff(int? id, int StaffId)
         {
             if (!id.HasValue)
@@ -574,5 +674,12 @@ namespace ThAmCo.Events.Controllers
 
             return RedirectToAction(nameof(Staff), new { id });
         }
+
+        /// <summary>
+        /// Checks whether or not an <see cref="Event"/> with the given <paramref name="id"/> exists.
+        /// </summary>
+        /// <param name="id">The <see cref="Event"/>'s Id.</param>
+        /// <returns>True if the event exists; false otherwise.</returns>
+        private bool EventExists(int id) => _context.Events.Where(c => !c.Cancelled).Any(e => e.Id == id);
     }
 }

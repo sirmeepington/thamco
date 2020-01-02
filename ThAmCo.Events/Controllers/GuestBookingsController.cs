@@ -8,6 +8,9 @@ using ThAmCo.Events.Models;
 
 namespace ThAmCo.Events.Controllers
 {
+    /// <summary>
+    /// ASP.NET MVC Controller for /Gu
+    /// </summary>
     public class GuestBookingsController : Controller
     {
         private readonly EventsDbContext _context;
@@ -17,7 +20,14 @@ namespace ThAmCo.Events.Controllers
             _context = context;
         }
 
-        // GET: GuestBookings/Index/EVENTID
+        /// <summary>
+        /// HTTP GET endpoint for "/GuestBookings/Index/<paramref name="id"/>". <para/>
+        /// Shows a list of existing bookings via a <see cref="System.Collections.Generic.List{GuestBooking}"/>
+        /// (T is <see cref="GuestBooking"/>). <para />
+        /// If an <paramref name="id"/> is specified; an <see cref="Event.Id"/> filter is applied;
+        /// otherwise all bookings are shown.
+        /// </summary>
+        /// <returns>Directs the user to the <see cref="Index(int?)"/> view.</returns>
         public async Task<IActionResult> Index(int? id)
         {
             var eventsDbContext = _context.Guests
@@ -42,7 +52,11 @@ namespace ThAmCo.Events.Controllers
             return View(await eventsDbContext.ToListAsync());
         }
 
-        // GET: GuestBookings/Create
+        /// <summary>
+        /// HTTP GET endpoint for "/GuestBookings/Create/". <para/>
+        /// Shows the creation options for a new <see cref="GuestBooking"/>.
+        /// </summary>
+        /// <returns>Directs the user to the <see cref="Create"/> view.</returns>
         public IActionResult Create()
         {
             ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "FullName");
@@ -50,9 +64,13 @@ namespace ThAmCo.Events.Controllers
             return View();
         }
 
-        // POST: GuestBookings/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        /// <summary>
+        /// HTTP POST endpoint for "/GuestBookings/Create/". <para/>
+        /// Creates a new <see cref="GuestBooking"/> via the <paramref name="guestBooking"/> model given.
+        /// </summary>
+        /// <param name="guestBooking">A <see cref="GuestBookingCreateViewModel"/> with required
+        /// information bound to it.</param>
+        /// <returns>Directs the user to the <see cref="Index"/> view on success or <see cref="Create"/> on fail.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CustomerId,EventId,Attended")] GuestBookingCreateViewModel guestBooking)
@@ -75,7 +93,14 @@ namespace ThAmCo.Events.Controllers
             return View(guestBooking);
         }
 
-        // GET: GuestBookings/Attend/5
+        /// <summary>
+        /// HTTP GET endpoint for "/GuestBookings/Attend/<paramref name="id"/>?customerId=<paramref name="customerId"/>". <para/>
+        /// Marks attendance for a <see cref="Customer"/> whose Id is <paramref name="customerId"/> on the <see cref="Event"/>
+        /// whose Id is <paramref name="id"/>.
+        /// </summary>
+        /// <param name="id">The <see cref="Event"/>'s Id.</param>
+        /// <param name="customerId">The <see cref="Customer"/>'s Id.</param>
+        /// <returns>Directs the user to the <see cref="Index(int?)"/> view with the filter of <paramref name="id"/>.</returns>
         public async Task<IActionResult> Attend(int? id, int? customerId)
         {
             if (id == null || customerId == null) 
@@ -96,7 +121,14 @@ namespace ThAmCo.Events.Controllers
 
         }
 
-        // GET: GuestBookings/Delete/5
+        /// <summary>
+        /// HTTP GET endpoint for "/GuestBookings/Remove/<paramref name="id"/>?customerId=<paramref name="customerId"/>". <para/>
+        /// Shows the removal confirmation screen for a <see cref="GuestBooking"/>.
+        /// Creates a <see cref="GuestBookingRemoveViewModel"/> to handle the data.
+        /// </summary>
+        /// <param name="customerId">The <see cref="Customer"/>'s Id whose booking is being removed.</param>
+        /// <param name="id">The <see cref="Event"/> of which the <see cref="Customer"/> is being removed from.</param>
+        /// <returns>Directs the user to the <see cref="Create"/> view.</returns>
         public async Task<IActionResult> Remove(int? id, int? customerId)
         {
             if (id == null || customerId == null)
@@ -107,7 +139,7 @@ namespace ThAmCo.Events.Controllers
                 .Include(g => g.Event)
                 .FirstOrDefaultAsync(m => m.CustomerId == customerId && m.EventId == id);
 
-            if (guestBooking == null || guestBooking.Event.Cancelled)
+            if (guestBooking == null || guestBooking.Event.Cancelled || guestBooking.Customer.Deleted)
                 return NotFound();
 
             GuestBookingRemoveViewModel viewModel = new GuestBookingRemoveViewModel()
@@ -122,7 +154,13 @@ namespace ThAmCo.Events.Controllers
             return View(viewModel);
         }
 
-        // POST: GuestBookings/Delete/5
+        /// <summary>
+        /// HTTP POST endpoint for "/GuestBookings/Remove/<paramref name="id"/>". <para/>
+        /// Removes a <see cref="GuestBooking"/> via the <paramref name="id"/> and <paramref name="customerId"/>.
+        /// </summary>
+        /// <param name="customerId">The <see cref="Customer"/>'s Id.</param>
+        /// <param name="id">The <see cref="Event"/>'s Id.</param>
+        /// <returns>Directs the user to the <see cref="Index(int?)"/> view.</returns>
         [HttpPost, ActionName("Remove")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveConfirmed(int id, int customerId)

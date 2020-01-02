@@ -7,6 +7,7 @@ using ThAmCo.Venues.Models;
 
 namespace ThAmCo.VenuesFacade
 {
+    /// <inheritdoc />
     public class VenueReservation : IVenueReservation
     {
         private ILogger<VenueReservation> _logger;
@@ -19,10 +20,10 @@ namespace ThAmCo.VenuesFacade
             _config = config;
         }
 
-        private bool EnsureClient()
+        private void EnsureClient()
         {
             if (_client != null)
-                return true;
+                return;
 
             _client = new HttpClient()
             {
@@ -30,7 +31,6 @@ namespace ThAmCo.VenuesFacade
                 Timeout = TimeSpan.FromSeconds(5)
             };
             _client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
-            return true;
         }
 
         public async Task<ReservationGetDto> GetReservation(string venueCode, DateTime startDate)
@@ -40,8 +40,7 @@ namespace ThAmCo.VenuesFacade
 
         public async Task<ReservationGetDto> GetReservation(string reference)
         {
-            if (!EnsureClient())
-                return null;
+            EnsureClient();
 
             ReservationGetDto reservation;
             try
@@ -62,10 +61,7 @@ namespace ThAmCo.VenuesFacade
 
         public async Task<ReservationGetDto> CreateReservation(DateTime eventDate, string venueCode)
         {
-            if (!EnsureClient())
-            {
-                return null;
-            }
+            EnsureClient();
 
             ReservationPostDto reservationDetails = new ReservationPostDto()
             {
@@ -88,8 +84,7 @@ namespace ThAmCo.VenuesFacade
 
         public async Task<bool> CancelReservation(string reference)
         {
-            if (!EnsureClient())
-                return false;
+            EnsureClient();
 
             try
             {

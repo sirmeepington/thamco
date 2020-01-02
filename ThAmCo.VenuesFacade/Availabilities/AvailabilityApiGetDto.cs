@@ -4,6 +4,9 @@ using System.Text;
 
 namespace ThAmCo.VenuesFacade.Availabilities
 {
+    /// <summary>
+    /// A Data Transfer Object that represents an <see cref="Venues.Data.Availability"/>.
+    /// </summary>
     public class AvailabilityApiGetDto
     {
         public string Code { get; set; }

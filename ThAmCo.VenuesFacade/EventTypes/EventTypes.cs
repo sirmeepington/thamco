@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace ThAmCo.VenuesFacade.EventTypes
 {
+    /// <inheritdoc cref="IEventTypes"/>
     public class EventTypes : IEventTypes
     {
         private ILogger<EventTypes> _logger;
@@ -20,10 +21,13 @@ namespace ThAmCo.VenuesFacade.EventTypes
             _config = config;
         }
 
-        private bool EnsureClient()
+        /// <summary>
+        /// Ensures the existance of a client by creating it if it does not exist.
+        /// </summary>
+        private void EnsureClient()
         {
             if (_client != null)
-                return true;
+                return;
 
             _client = new HttpClient()
             {
@@ -31,19 +35,20 @@ namespace ThAmCo.VenuesFacade.EventTypes
                 Timeout = TimeSpan.FromSeconds(5)
             };
             _client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
-            return true;
+            _logger.LogDebug("Created a HTTPClient for accessing EventTypes");
         }
 
+        /// <inheritdoc />
         public async Task<EventTypeDto> GetEventType(string type)
         {
             var dtos = await GetEventTypes();
             return dtos.FirstOrDefault(x => x.Id == type);
         }
 
+        /// <inheritdoc />
         public async Task<List<EventTypeDto>> GetEventTypes()
         {
-            if (!EnsureClient())
-                return null;
+            EnsureClient();
 
             List<EventTypeDto> eventTypeDtos;
             try
@@ -60,6 +65,10 @@ namespace ThAmCo.VenuesFacade.EventTypes
             return eventTypeDtos;
         }
 
+        /// <summary>
+        /// Destructor for disposing the client when necessary to avoid any sort of connection
+        /// or memory leaking.
+        /// </summary>
         ~EventTypes()
         {
             if (_client != null)

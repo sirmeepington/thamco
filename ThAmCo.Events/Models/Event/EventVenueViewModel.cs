@@ -7,6 +7,9 @@ using ThAmCo.Venues.Data;
 
 namespace ThAmCo.Events.Models
 {
+    /// <summary>
+    /// A view model to be used in the changing of staff of an <see cref="Data.Event"/>.
+    /// </summary>
     public class EventVenueViewModel
     {
         public int Id { get; set; }
