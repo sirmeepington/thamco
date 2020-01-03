@@ -372,34 +372,11 @@ namespace ThAmCo.Events.Controllers
             if (@event == null || @event.Cancelled)
                 return NotFound();
 
-            List<AvailabilityApiGetDto> apiGetDtos = await _availabilities
-                .GetAvailabilities(@event.TypeId, @event.Date, @event.Date.Add(@event.Duration.Value));
-            List<Availability> availabilities = new List<Availability>();
-            foreach(AvailabilityApiGetDto avail in apiGetDtos)
-            {
-                availabilities.Add(new Availability()
-                {
-                    CostPerHour = avail.CostPerHour,
-                    Date = avail.Date,
-                    VenueCode = avail.Code,
-                    Venue = new Venue()
-                    {
-                        Code = avail.Code,
-                        Name = avail.Name,
-                        Description = avail.Description,
-                        Capacity = avail.Capacity
-                    }
-                });
-            }
-
-            SelectList applicableVenues = new SelectList(availabilities,"Code","Name",availabilities.FirstOrDefault());
-
             EventEditViewModel eventEditViewModel = new EventEditViewModel()
             {
                 Duration = @event.Duration,
                 Id = @event.Id,
-                Title = @event.Title,
-                ApplicableVenues = applicableVenues
+                Title = @event.Title
             };
             return View(eventEditViewModel);
         }
