@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Primitives;
 using ThAmCo.Events.Data;
 using ThAmCo.Events.Models;
 
@@ -77,6 +78,15 @@ namespace ThAmCo.Events.Controllers
         {
             if (ModelState.IsValid)
             {
+                GuestBooking existing = await _context.Guests.FindAsync(guestBooking.EventId, guestBooking.CustomerId);
+                if (existing != null)
+                {
+                    // Exists
+                    ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "FullName", guestBooking.CustomerId);
+                    ViewData["EventId"] = new SelectList(_context.Events, "Id", "Title", guestBooking.EventId);
+                    ModelState.AddModelError(string.Empty, "The chosen guest is already booked into the chosen event.");
+                    return View(guestBooking);
+                }
                 GuestBooking booking = new GuestBooking()
                 {
                     CustomerId = guestBooking.CustomerId,
@@ -117,7 +127,9 @@ namespace ThAmCo.Events.Controllers
             _context.Entry(booking).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index), new { id });
+            if (StringValues.IsNullOrEmpty(Request.Headers["Referer"]))
+                return RedirectToAction(nameof(Index));
+            return Redirect(Request.Headers["Referer"].ToString());
 
         }
 

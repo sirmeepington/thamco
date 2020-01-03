@@ -9,9 +9,9 @@
 <h4>Book a new Guest into Event</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-5">
         <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="ModelOnly" class="text-danger alert alert-danger" role="alert"></div>
             <div class="form-group">
                 <label asp-for="CustomerId" class="control-label"></label>
                 <select asp-for="CustomerId" class ="form-control" asp-items="ViewBag.CustomerId"></select>
@@ -21,11 +21,8 @@
                 <select asp-for="EventId" class ="form-control" asp-items="ViewBag.EventId"></select>
             </div>
             <div class="form-group">
-                <div class="checkbox">
-                    <label>
-                        <input asp-for="Attended" /> @Html.DisplayNameFor(model => model.Attended)
-                    </label>
-                </div>
+                <label asp-for="Attended" class="control-label"></label>
+                <input class="form-control" asp-for="Attended" />
             </div>
             <div class="form-group">
                 <input type="submit" value="Book" class="btn btn-default" />
