@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace ThAmCo.Events.Models
 {
+    /// <summary>
+    /// A view model for viewing a general overview of <see cref="Data.Staff"/>.
+    /// </summary>
     public class StaffIndexViewModel
     {
 
