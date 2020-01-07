@@ -55,5 +55,10 @@ namespace ThAmCo.Events.Data
         /// Whether or not the event has been cancelled and should not be counted towards anything.
         /// </summary>
         public bool Cancelled { get; set; }
+
+        /// <summary>
+        /// The current catering menu that has been assigned to this event.
+        /// </summary>
+        public int AssignedMenu { get; set; }
     }
 }

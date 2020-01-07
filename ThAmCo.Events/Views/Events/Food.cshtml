@@ -1,0 +1,67 @@
+﻿@model ThAmCo.Events.Models.EventFoodViewModel
+
+@{
+    ViewData["Title"] = "Catering Details";
+}
+
+<h2>Catering Details for: @Model.Title</h2>
+
+<div>
+    <hr />
+    <h4>Event Details</h4>
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Title)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Title)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Date)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Date)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.EventType)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.EventType)
+        </dd>
+    </dl>
+    <hr />
+    <h4>Catering Details</h4>
+    @if (Model.Menu == null)
+    {
+        <p>There is no current menu attached to this event.</p>
+        var selectList = new SelectList(Model.AvailableMenus, "Id", "Name");
+        <select name="Menu" id="menuList" class="form-control" asp-items="@selectList" form="menuForm">
+            <option disabled="disabled" selected="selected">Choose a Menu</option>
+        </select>
+        <p></p>
+        <form id="menuForm" asp-action="AddMenu">
+            <input asp-for="Id" type="hidden" />
+            <input type="submit" id="assignButton" disabled="disabled" class="btn btn-default" value="Reserve" />
+        </form>
+        <br />
+    }
+    else
+    {
+
+    }
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning"><span class="glyphicon glyphicon-pencil"></span> Edit Event</a>
+    <a asp-action="Venue" asp-route-id="@Model.Id" class="btn btn-warning"><span class="glyphicon glyphicon-pencil"></span> Edit Venue</a>
+    <a asp-action="Index" class="btn btn-default">Back to List</a>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script>
+        $("#menuList").on("change", function (e) {
+            $("#assignButton").prop("disabled","");
+            console.log("ID: " + e.target.value);
+        });
+    </script>
+}

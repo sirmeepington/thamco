@@ -24,6 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CateringFacade\ThAmCo.CateringFacade.csproj" />
+    <ProjectReference Include="..\ThAmCo.Catering\ThAmCo.Catering.csproj" />
     <ProjectReference Include="..\ThAmCo.VenuesFacade\ThAmCo.VenuesFacade.csproj" />
     <ProjectReference Include="..\ThAmCo.Venues\ThAmCo.Venues.csproj" />
   </ItemGroup>

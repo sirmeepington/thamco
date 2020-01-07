@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ThAmCo.CateringFacade.Food;
+using ThAmCo.CateringFacade.Menu;
+using ThAmCo.CateringFacade.MenuFood;
 using ThAmCo.Events.Data;
 using ThAmCo.VenuesFacade;
 using ThAmCo.VenuesFacade.EventTypes;
@@ -41,6 +44,9 @@ namespace ThAmCo.Events
             });
             services.AddScoped<IVenueAvailabilities, VenueAvailabilities>();
             services.AddScoped<IVenueReservation, VenueReservation>();
+            services.AddScoped<IMenuManagement, MenuManagement>();
+            services.AddScoped<IMenuFoodManagement, MenuFoodManagement>();
+            services.AddScoped<IFoodManagement, FoodManagement>();
             services.AddScoped<IEventTypes, EventTypes>();
         }
 

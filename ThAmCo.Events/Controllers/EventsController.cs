@@ -12,6 +12,10 @@ using ThAmCo.Venues.Models;
 using ThAmCo.VenuesFacade;
 using ThAmCo.VenuesFacade.Availabilities;
 using ThAmCo.VenuesFacade.EventTypes;
+using ThAmCo.CateringFacade.MenuFood;
+using ThAmCo.CateringFacade.Menu;
+using ThAmCo.Catering.Data;
+using ThAmCo.Catering.Models;
 
 namespace ThAmCo.Events.Controllers
 {
@@ -37,17 +41,25 @@ namespace ThAmCo.Events.Controllers
         /// </summary>
         private readonly IEventTypes _eventTypes;
 
+        private readonly IMenuFoodManagement _menuFoodManagement;
+
+        private readonly IMenuManagement _menuManagement;
+
         public EventsController(
             EventsDbContext context, 
             IVenueAvailabilities availabilities, 
             IVenueReservation reservations, 
-            IEventTypes eventTypes
+            IEventTypes eventTypes,
+            IMenuFoodManagement menuFood,
+            IMenuManagement menu
             )
         {
             _context = context;
             _availabilities = availabilities;
             _reservations = reservations;
             _eventTypes = eventTypes;
+            _menuManagement = menu;
+            _menuFoodManagement = menuFood;
         }
 
         /// <summary>
@@ -658,5 +670,37 @@ namespace ThAmCo.Events.Controllers
         /// <param name="id">The <see cref="Event"/>'s Id.</param>
         /// <returns>True if the event exists; false otherwise.</returns>
         private bool EventExists(int id) => _context.Events.Where(c => !c.Cancelled).Any(e => e.Id == id);
+
+        /// <summary>
+        /// HTTP GET endpoint of "Events/Food/<paramref name="id"/>". <para/>
+        /// Shows catering information for the current event; including the current
+        /// menu and the food that is on it.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> Food(int? id)
+        {
+
+            Event e = await _context.Events.FirstOrDefaultAsync(x => x.Id == id);
+            if (e == null)
+                return NotFound();
+
+
+            List<MenuGetDto> allmenus = await _menuManagement.GetMenus();
+            List<int> events = await _context.Events.Where(x => x.AssignedMenu != 0).Select(x => x.AssignedMenu).ToListAsync();
+            List<MenuGetDto> available = allmenus.Where(x => !events.Contains(x.Id)).ToList();
+
+            EventFoodViewModel vm = new EventFoodViewModel()
+            {
+                Id = e.Id,
+                Date = e.Date,
+                Title = e.Title,
+                EventType = (await _eventTypes.GetEventType(e.TypeId)).Title,
+                Menu = await _menuManagement.GetMenu(e.AssignedMenu),
+                AvailableMenus = available
+            };
+
+            return View(vm);
+        }
     }
 }
