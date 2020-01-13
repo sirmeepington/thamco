@@ -7,7 +7,9 @@
 <h2>Event List</h2>
 
 <p>
-    <a class="btn btn-success" asp-action="Create"><span class="glyphicon glyphicon-plus"></span> Create New</a>
+    <a class="btn btn-success" asp-action="Create">
+        <span class="glyphicon glyphicon-plus"></span> Create New
+    </a>
 </p>
 <table class="table">
     <thead>
@@ -63,13 +65,14 @@
                 <a class="btn btn-default" asp-action="Details" asp-route-id="@item.Id"><span class="glyphicon glyphicon-search"></span> Details</a>
                 <a class="btn btn-default" asp-action="Venue" asp-route-id="@item.Id"><span class="glyphicon glyphicon-picture"></span> Venue</a>
                 <a class="btn btn-default" asp-action="Staff" asp-route-id="@item.Id"><span class="glyphicon glyphicon-user"></span> Staff</a>
+                <a class="btn btn-default" asp-action="Food" asp-route-id="@item.Id"><span class="glyphicon glyphicon-cutlery"></span> Food</a>
                 @if (DateTime.UtcNow > item.Date.Add(item.Duration.Value))
                 {
                     <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id"><span class="glyphicon glyphicon-remove"></span> Delete</a>
                 }
                 else
                 {
-                <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id"><span class="glyphicon glyphicon-remove"></span> Cancel</a>
+                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id"><span class="glyphicon glyphicon-remove"></span> Cancel</a>
                 }
             </td>
         </tr>

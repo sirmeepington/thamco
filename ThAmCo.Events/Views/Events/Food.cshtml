@@ -34,8 +34,14 @@
     @if (Model.Menu == null)
     {
         <p>There is no current menu attached to this event.</p>
-        var selectList = new SelectList(Model.AvailableMenus, "Id", "Name");
-        <select name="Menu" id="menuList" class="form-control" asp-items="@selectList" form="menuForm">
+        if (Model.AvailableMenus == null || Model.AvailableMenus.Count <= 0)
+        {
+            <p><b>There are no available menus for this event. Please free from other events or create more.</b></p>
+        }
+        else
+        {
+            var selectList = new SelectList(Model.AvailableMenus, "Id", "Name");
+        <select name="SelectedMenu" id="menuList" class="form-control" asp-items="@selectList" form="menuForm">
             <option disabled="disabled" selected="selected">Choose a Menu</option>
         </select>
         <p></p>
@@ -44,10 +50,26 @@
             <input type="submit" id="assignButton" disabled="disabled" class="btn btn-default" value="Reserve" />
         </form>
         <br />
+        }
     }
     else
     {
-
+        <p>This event currently has a menu assigned:</p>
+        <dl class="dl-horizontal">
+            <dt>@Html.DisplayNameFor(x => Model.Menu.Name)</dt>
+            <dd>@Html.DisplayFor(x => Model.Menu.Name)</dd>
+            <dt>Food Items</dt>
+            <dd>
+                @foreach (ThAmCo.Catering.Models.FoodGetDto food in Model.Menu.Food)
+                {
+                    <li style="list-style:none">@food.Name - £@food.Cost</li>
+                }
+                <li style="list-style:none"><b>Total: £@Model.Menu.Food.Sum(x => x.Cost)</b></li>
+            </dd>
+        </dl>
+        <a class="btn btn-danger" asp-action="RemoveMenu" asp-route-id="@Model.Id">
+            <span class="glyphicon glyphicon-remove"></span> Remove Menu</a>
+        <p></p>
     }
 </div>
 <div>

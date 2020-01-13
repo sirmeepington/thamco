@@ -22,5 +22,7 @@ namespace ThAmCo.Events.Models
 
         public List<MenuGetDto> AvailableMenus { get; set; }
 
+        public int SelectedMenu { get; set; }
+
     }
 }

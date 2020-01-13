@@ -702,5 +702,56 @@ namespace ThAmCo.Events.Controllers
 
             return View(vm);
         }
+
+        /// <summary>
+        /// HTTP POST endpoint of "Events/AddMenu/<paramref name="id"/>".<para/>
+        /// Assigns a menu to the event specified.
+        /// </summary>
+        /// <param name="id">The Event's ID.</param>
+        /// <param name="event">The POST object for the event.</param>
+        /// <returns>Redirection to <see cref="Food(int?)"/> or a 404/400 page.</returns>
+        [HttpPost]
+        public async Task<IActionResult> AddMenu(int? id, EventFoodViewModel @event)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            if (id != @event.Id)
+                return NotFound();
+
+            Event e = await _context.Events.FindAsync(id);
+            if (e == null)
+                return NotFound();
+            if (e.AssignedMenu != 0)
+                return RedirectToAction(nameof(Food), new { id });
+
+            e.AssignedMenu = @event.SelectedMenu;
+            _context.Events.Update(e);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Food), new { id });
+        }
+
+        /// <summary>
+        /// Removes a menu from the event with the specified ID.
+        /// </summary>
+        /// <param name="id">The ID of the event.</param>
+        /// <returns>NotFound if the event does not exist; otherwise redirects
+        /// to <see cref="Food(int?)"/>.</returns>
+        public async Task<IActionResult> RemoveMenu(int? id)
+        {
+            Event e = await _context.Events.FindAsync(id);
+            if (e == null)
+                return NotFound();
+
+            if (e.AssignedMenu == 0)
+                return RedirectToAction(nameof(Food), new { id });
+
+            e.AssignedMenu = 0;
+            _context.Events.Update(e);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Food), new { id });
+        }
     }
 }

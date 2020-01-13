@@ -103,7 +103,8 @@
     <hr />
 </div>
 <div>
-    <a asp-action="Edit" class="btn btn-warning" asp-route-id="@Model.Id"><span class="glyphicon glyphicon-pencil"></span> Edit Event</a>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning"><span class="glyphicon glyphicon-pencil"></span> Edit Event</a>
+    <a asp-action="Food" asp-route-id="@Model.Id" class="btn btn-warning"><span class="glyphicon glyphicon-cutlery"></span> Edit Food</a>
     <a asp-action="Index" class="btn btn-default">Back to List</a>
 </div>
 @section Scripts {
@@ -129,7 +130,7 @@
                 $('#venueInfo').text("Getting info...");
                 var startdate = new Date(datestr[2], datestr[1]-1, datestr[0]);
                 var enddate = new Date(datestr[2], datestr[1] - 1, datestr[0], duration[0], duration[1], duration[2]);
-                // AJAX call \/
+                // AJAX call //
                 $.get(("http://localhost:23652/api/availability?eventType=" + eventType + "&beginDate=" + startdate.toISOString() + "&endDate=" + enddate.toISOString()), function (res) {
                     var venue;
                     var venues = res;
