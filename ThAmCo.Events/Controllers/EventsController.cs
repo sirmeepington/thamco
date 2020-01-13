@@ -40,9 +40,13 @@ namespace ThAmCo.Events.Controllers
         /// Interface for accessing full names of event types via their ID.
         /// </summary>
         private readonly IEventTypes _eventTypes;
-
+        /// <summary>
+        /// Interface for interacting with the food that are on menus.
+        /// </summary>
         private readonly IMenuFoodManagement _menuFoodManagement;
-
+        /// <summary>
+        /// Interface for interacting with menus and assigning them to an event.
+        /// </summary>
         private readonly IMenuManagement _menuManagement;
 
         public EventsController(
@@ -241,7 +245,7 @@ namespace ThAmCo.Events.Controllers
                 }).ToList();
 
             // This block may be redundant depending on the availability behaviour and if a reserved availability is not included in the list.
-            // (I assume it is not; thus this code block is commented out.)
+            // (I assume its redundant so its commented out.)
 
             //List<Availability> nonReserved = new List<Availability>();
             //foreach (Availability availability in availabilities) 
