@@ -34,6 +34,23 @@
         <dd>
             @Html.DisplayFor(model => model.TypeId)
         </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Pricings)
+        </dt>
+        <dd>
+            @if (Model.Pricings.Count == 0)
+            {
+                <li style="list-style:none">No pricings available.</li>
+            }
+            else
+            {
+                @foreach (KeyValuePair<string, float> entry in Model.Pricings)
+                {
+                    <li style="list-style:none">@entry.Key - £@entry.Value</li>
+                }
+                <li style="list-style:none"><b>Total: £@Model.Pricings.Values.Sum()</b></li>
+            }
+        </dd>
     </dl>
     <hr />
     <h4>Booking Details</h4>

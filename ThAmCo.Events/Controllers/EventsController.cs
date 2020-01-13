@@ -102,6 +102,25 @@ namespace ThAmCo.Events.Controllers
             if (@event == null)
                 return NotFound();
 
+            Dictionary<string, float> pricing = new Dictionary<string, float>();
+            if (@event.AssignedMenu != 0)
+            {
+                MenuGetDto menu = await _menuManagement.GetMenu(@event.AssignedMenu);
+                if (menu != null)
+                {
+                    float foodPrice = (float)menu.Food.Sum(x => x.Cost);
+                    pricing.Add("Menu (sum of food)", foodPrice);
+                }
+            }
+            if (@event.VenueReservation != null)
+            {
+                ReservationGetDto res = await _reservations.GetReservation(@event.VenueReservation);
+                List<AvailabilityApiGetDto> avail = await _availabilities
+                    .GetAvailabilities(@event.TypeId, new DateTime(2018, 07, 10), new DateTime(2019, 2, 10));
+                AvailabilityApiGetDto availability = avail.FirstOrDefault(x => x.Code == res.VenueCode);
+                pricing.Add("Venue (per hour)", (float)availability.CostPerHour);
+            }
+
             EventDetailsViewModel viewModel = new EventDetailsViewModel()
             {
                 Id = @event.Id,
@@ -135,6 +154,7 @@ namespace ThAmCo.Events.Controllers
                         CustomerId = x.CustomerId,
                         EventId = x.EventId
                     }).ToListAsync(),
+                Pricings = pricing
             };
             
             return View(viewModel);
@@ -172,7 +192,7 @@ namespace ThAmCo.Events.Controllers
                         Code = a.Code,
                         Capacity = a.Capacity,
                         Description = a.Description,
-                        Name = a.Name 
+                        Name = a.Name
                     }).FirstOrDefault();
 
                 if (venue == null)

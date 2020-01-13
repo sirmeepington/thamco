@@ -42,5 +42,7 @@ namespace ThAmCo.Events.Models
         /// </summary>
         public EventWarningType Warnings { get; set; }
 
+        public Dictionary<string,float> Pricings { get; set; }
+
     }
 }
