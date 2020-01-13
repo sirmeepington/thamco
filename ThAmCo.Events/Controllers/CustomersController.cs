@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,11 +19,22 @@ namespace ThAmCo.Events.Controllers
 
         /// <summary>
         /// HTTP GET endpoint for "/Customers/". <para/>
-        /// Returns a <see cref="System.Collections.Generic.List{T}"/> (T is <see cref="Customer"/>)
+        /// Returns a <see cref="List{T}"/> (T is <see cref="Customer"/>)
         /// of all customers to the Index view.
         /// </summary>
         /// <returns>Redirects the user to the Index view.</returns>
-        public async Task<IActionResult> Index() => View(await _context.Customers.Where(c => !c.Deleted).ToListAsync());
+        public async Task<IActionResult> Index()
+        {
+            List<CustomerDetailsViewModel> models = await _context.Customers.Where(c => !c.Deleted)
+                .Select(x => new CustomerDetailsViewModel()
+                {
+                    FirstName = x.FirstName,
+                    Surname = x.Surname,
+                    Id = x.Id,
+                    Email = x.Email
+                }).ToListAsync();
+            return View(models);
+        }
 
         /// <summary>
         /// HTTP GET endpoint for "/Customers/Details/<paramref name="id"/>". <para/>
