@@ -82,8 +82,8 @@ namespace ThAmCo.Events.Controllers
                 if (existing != null)
                 {
                     // Exists
-                    ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "FullName", guestBooking.CustomerId);
-                    ViewData["EventId"] = new SelectList(_context.Events, "Id", "Title", guestBooking.EventId);
+                    ViewData["CustomerId"] = new SelectList(await _context.Customers.Where(x => !x.Deleted).ToListAsync(), "Id", "FullName", guestBooking.CustomerId);
+                    ViewData["EventId"] = new SelectList(await _context.Events.Where(x => !x.Cancelled).ToListAsync(), "Id", "Title", guestBooking.EventId);
                     ModelState.AddModelError(string.Empty, "The chosen guest is already booked into the chosen event.");
                     return View(guestBooking);
                 }
@@ -98,8 +98,8 @@ namespace ThAmCo.Events.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "FullName", guestBooking.CustomerId);
-            ViewData["EventId"] = new SelectList(_context.Events, "Id", "Title", guestBooking.EventId);
+            ViewData["CustomerId"] = new SelectList(await _context.Customers.Where(x => !x.Deleted).ToListAsync(), "Id", "FullName", guestBooking.CustomerId);
+            ViewData["EventId"] = new SelectList(await _context.Events.Where(x => !x.Cancelled).ToListAsync(), "Id", "Title", guestBooking.EventId);
             return View(guestBooking);
         }
 

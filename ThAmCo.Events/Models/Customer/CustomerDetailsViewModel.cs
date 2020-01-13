@@ -36,7 +36,7 @@ namespace ThAmCo.Events.Models
 
         /// <inheritdoc cref="Data.Customer.FirstName"/>
         [Display(Name = "Full Name")]
-        public string FullName { get; set; }
+        public string FullName => FirstName + " " + Surname;
 
 
     }

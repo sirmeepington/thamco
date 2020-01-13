@@ -143,7 +143,6 @@ namespace ThAmCo.Events.Controllers
                         {
                             Email = x.Customer.Email,
                             FirstName = x.Customer.FirstName,
-                            FullName = x.Customer.FullName,
                             Id = x.Customer.Id,
                             Surname = x.Customer.Surname
                         },
